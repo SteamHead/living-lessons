@@ -11,7 +11,7 @@ summary: "Create a comic book illustrating solutions you would like your subject
 levels_defined: [1, 2, 3, 4, 5]
 ai_drafted_levels: []
 status: "canonical"
-flags: []
+flags: ["Expanded: movable panels get concrete (sticky notes), and each level names its reader test."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
@@ -21,12 +21,12 @@ Create a comic book illustrating solutions you would like your subjects to have.
 
 ## Depth levels
 
-**1 — Introductory.** Create a comic-book-style representation of a brainstorm idea in action.
+**1 — Introductory.** Create a comic-book-style story showing one of your brainstorm ideas in action: who uses it, what happens, and how it helps.
 
-**2 — Early.** Create a comic-book-style representation of a brainstorm idea in action, with movable panels to easily arrange events.
+**2 — Early.** Create a comic-book story of a brainstorm idea using movable panels — sticky notes or cards — so you can easily rearrange the order of events.
 
-**3 — Preparatory.** Create a comic-book-style representation of a brainstorm idea adhering to a chosen process, with movable panels to easily arrange events and ideas.
+**3 — Preparatory.** Create a comic-book story of an idea following a chosen process, with movable panels to arrange events and ideas until the story flows.
 
-**4 — Intermediate.** Create a comic-book-style representation of a brainstorm idea adhering to a chosen process, with movable panels; clear identification of problem and solution.
+**4 — Intermediate.** Create a comic-book story with movable panels that clearly identifies the problem and your solution. A reader should spot both without your help.
 
-**5 — Advanced.** Create a comic-book-style representation of a brainstorm idea adhering to a chosen process, with movable panels; clear identification of problem, solution, relevant variables, and correlated data.
+**5 — Advanced.** Create a comic-book story with movable panels that clearly shows the problem, the solution, the variables that matter, and the data that backs it up.

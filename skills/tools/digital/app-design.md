@@ -11,7 +11,7 @@ summary: "Design a game or application."
 levels_defined: [2, 3, 4, 5]
 ai_drafted_levels: []
 status: "canonical"
-flags: ["Rubrics from 'Design an App' in the old progression sheet."]
+flags: ["Rubrics from 'Design an App' in the old progression sheet.", "Light expansion; each level names its platform jump."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
@@ -23,10 +23,10 @@ Design a game or application.
 
 **1 — Introductory.** *Not introduced at this level.*
 
-**2 — Early.** Physical computing: create a physical game among your peers, decide upon the rules, and record everything as a class.
+**2 — Early.** Physical computing: invent a physical game with your classmates, decide the rules together, and record everything as a class.
 
-**3 — Preparatory.** Using Scratch, Code.org, or similar, complete several guided projects. Finish with a design challenge.
+**3 — Preparatory.** Using Scratch, Code.org, or similar, complete several guided projects, then finish with a design challenge of your own.
 
-**4 — Intermediate.** Using a 3D game in a programmable world (CoSpaces, Minecraft, a hacked Unity game, etc.), complete a guided project and a design challenge.
+**4 — Intermediate.** In a programmable 3D world — CoSpaces, Minecraft, a hacked Unity game — complete a guided project and then a design challenge.
 
-**5 — Advanced.** Create an Android or iOS app, install it on a mobile device, and share it. Use a guided project as a template, and introduce design choices.
+**5 — Advanced.** Create an Android or iOS app, install it on a real mobile device, and share it. Start from a guided template, then add your own design choices.

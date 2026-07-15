@@ -2,17 +2,17 @@
 id: "workshop"
 name: "Workshop"
 domain: "heart"
-stage: "inspire"
+stage: "share"
 wing: null
 group: null
 kind: "core"
-two_sided: true
+pair: "learning-station"
 order: 2
 summary: "Teach a real class on how to build your project!"
 levels_defined: [1, 2, 3, 4, 5]
 ai_drafted_levels: []
 status: "canonical"
-flags: []
+flags: ["Moves to the new Share stage; inbound side becomes Learning Station. Levels expanded with checks for understanding."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
@@ -20,23 +20,14 @@ source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 
 Teach a real class on how to build your project!
 
-## Two sides of this skill
-
-Inspire is a circle: projects begin when someone else's work lights a spark, and end when your work sparks the next maker. Every Inspire badge has an inbound side (getting inspired) and an outbound side (inspiring others).
-
-- **Inbound (getting inspired):** Do a workshop just to learn — try an activity for its own sake, even if it never joins your project.
-- **Outbound (inspiring others):** Teach a real workshop on how to build your project.
-
-The depth levels below cover the outbound side; inbound rubrics are an open question.
-
 ## Depth levels
 
-**1 — Introductory.** Help another two students perform an action or learn a simple skill related to the project.
+**1 — Introductory.** Help two other students perform an action or learn a simple skill from your project — like tucking thumbs when cutting cardboard. Check that both can do it without you.
 
-**2 — Early.** Help another two students learn a detailed skill related to the project.
+**2 — Early.** Help two other students learn a detailed skill from your project, step by step. Watch them try it, and give useful, kind feedback until they can do it alone.
 
-**3 — Preparatory.** Create a tutorial on a detailed skill. Document it (written, video, or drawn). Teach it to at least two students.
+**3 — Preparatory.** Create a tutorial on a detailed skill and document it — written, drawn, or video. Teach it to at least two students, and improve the tutorial from their questions.
 
-**4 — Intermediate.** Create a lesson plan on a detailed skill. Document it (written, video, or drawn); make sure it takes at least 5 minutes. Teach it to four students.
+**4 — Intermediate.** Create a lesson plan for a detailed skill, at least five minutes long, with documentation. Teach it to four students, and reflect on what you would change next time.
 
-**5 — Advanced.** Create a 40-minute class plan including materials, time and place, lesson plan, learning outcomes, and documentation. Teach it to at least four students.
+**5 — Advanced.** Create a full 40-minute class plan: materials, time and place, lesson steps, learning outcomes, and documentation. Teach it to at least four students — in your class or beyond.

@@ -8,10 +8,10 @@ group: "computer-foundations"
 kind: "tool"
 order: 1
 summary: "Use search engines effectively: choose keywords, read results, and judge credibility."
-levels_defined: [2, 3, 4, 5]
-ai_drafted_levels: []
-status: "canonical"
-flags: ["NEW skill per James: the former 'Search Education' ladder, split out of Empowered Searcher/Researcher."]
+levels_defined: [1, 2, 3, 4, 5]
+ai_drafted_levels: [1]
+status: "needs-review"
+flags: ["NEW skill per James: the former 'Search Education' ladder, split out of Empowered Searcher/Researcher.", "Honest backfill at L1 (watch a search, spot the answer); levels reworded as verbs kids do."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
@@ -21,12 +21,12 @@ Use search engines effectively: choose keywords, read results, and judge credibi
 
 ## Depth levels
 
-**1 — Introductory.** *Not introduced at this level.*
+**1 — Introductory.** *(AI draft — review)* As a class, ask a question and watch the teacher search for it. Spot where the answer appears on the results page.
 
-**2 — Early.** Keyword lesson: pick the best words to search, full questions vs. keywords, and how to think of more keywords by asking people around you.
+**2 — Early.** Learn keywords: pick the best words to search, compare full questions to keywords, and gather more keyword ideas by asking people around you.
 
-**3 — Preparatory.** Understanding results: the results page layout, evaluating results from summaries and URLs. Try new search strategies — general or specialist keywords, adding locations or context words.
+**3 — Preparatory.** Understand results: read the results page layout, judge results from summaries and URLs, and try new strategies — broader words, narrower words, adding places or context.
 
-**4 — Intermediate.** Advancement on prior topics, plus evaluating source credibility: consider tone, style, audience, and purpose to determine the information's credibility.
+**4 — Intermediate.** Evaluate credibility: consider a source's tone, style, audience, and purpose to decide how much to trust its information.
 
-**5 — Advanced.** Searching for evidence for research tasks: investigate different website types (blogs, news, wikis, white papers, ads, etc.) and identify which type of page you need for your research.
+**5 — Advanced.** Search for evidence: investigate different website types — blogs, news, wikis, white papers, ads — and choose which type your research question actually needs.

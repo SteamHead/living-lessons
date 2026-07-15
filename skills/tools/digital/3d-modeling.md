@@ -11,7 +11,7 @@ summary: "3D drawing of a physical model, using measurements."
 levels_defined: [3, 4, 5]
 ai_drafted_levels: []
 status: "canonical"
-flags: []
+flags: ["Light expansion; L5 ends print-ready."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
@@ -25,8 +25,8 @@ source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 
 **2 — Early.** *Not introduced at this level.*
 
-**3 — Preparatory.** Equipment: touchscreens and a simple 3D program. Projects: hack a drawing in a design challenge.
+**3 — Preparatory.** Using touchscreens and a simple 3D program, hack an existing drawing as part of a design challenge.
 
-**4 — Intermediate.** Equipment: laptops + mouse, and a simple 3D program. Projects: download-and-hack, then design challenge.
+**4 — Intermediate.** Using laptops and a simple 3D program, complete a download-and-hack project and then a design challenge.
 
-**5 — Advanced.** Equipment: laptops + mouse, and an advanced 3D program. Projects: replicate a real-world object to scale, then create a custom object to scale.
+**5 — Advanced.** Using an advanced 3D program, replicate a real-world object to scale, then design a custom object to scale — ready to 3D print.

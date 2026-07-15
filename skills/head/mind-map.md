@@ -11,7 +11,7 @@ summary: "Map everything you learned \u2014 people, places, and problems \u2014 
 levels_defined: [1, 2, 3, 4, 5]
 ai_drafted_levels: [1, 2, 3, 4, 5]
 status: "needs-review"
-flags: ["Confirmed distinct from Mood Board; full ladder is a new AI draft.", "Summary and levels 4-5 refocused on problem-finding (Define) per 2026-07-14 review; 'solutions' language removed."]
+flags: ["Confirmed distinct from Mood Board; full ladder is a new AI draft.", "Summary and levels 4-5 refocused on problem-finding (Define) per 2026-07-14 review; 'solutions' language removed.", "Same ladder, expanded: labeled connections and an explainable marking system."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
@@ -21,12 +21,12 @@ Map everything you learned — people, places, and problems — to find the prob
 
 ## Depth levels
 
-**1 — Introductory.** *(AI draft — review)* As a class, draw a map on the board connecting your subject to the people and places around them.
+**1 — Introductory.** *(AI draft — review)* As a class, draw a map on the board connecting your subject to the people and places around them. Add lines and talk about how everything connects.
 
-**2 — Early.** *(AI draft — review)* In a small group, draw a map on poster paper with your subject in the middle, connected to people, places, and problems.
+**2 — Early.** *(AI draft — review)* In a small group, draw a map on poster paper with your subject in the middle, connected to people, places, and problems you learned about in your research.
 
-**3 — Preparatory.** *(AI draft — review)* Create your own mind map connecting your subject to their people, places, and problems. Label each connection.
+**3 — Preparatory.** *(AI draft — review)* Create your own mind map connecting your subject to their people, places, and problems. Label each connection with a word that explains the link.
 
-**4 — Intermediate.** *(AI draft — review)* Create a mind map that connects people, places, and problems. Use colors or symbols to show which problems matter most.
+**4 — Intermediate.** *(AI draft — review)* Create a mind map connecting people, places, and problems. Use colors or symbols to show which problems matter most, and be ready to explain your marking system.
 
-**5 — Advanced.** *(AI draft — review)* Create a wall-size mind map of people, places, and problems. Present it, explaining which problem your class should take on and why.
+**5 — Advanced.** *(AI draft — review)* Create a wall-size mind map of people, places, and problems. Present it, explaining which problem your class should take on and why the map points there.
