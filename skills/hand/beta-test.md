@@ -2,7 +2,7 @@
 id: "beta-test"
 name: "Beta Test"
 domain: "hand"
-stage: "testing"
+stage: "test"
 wing: null
 group: null
 kind: "core"

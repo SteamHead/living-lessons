@@ -39,6 +39,9 @@ Living Lessons is a separate repo/Worker from steamhead-site-rebuild, so the mar
 ## D11 — Skill taxonomy canonicalized (DECIDED, 2026-07-12)
 James resolved the spreadsheet drift: Heart stage is "Inspire"; "Digital Storytelling" over Digital Citizen Post; "Empowered Researcher" (Media Research ladder) with search mechanics split into a new "Search Engines" skill; new Computer Foundations group (Search Engines, Account Creation, Managing Digital Media); Mind Map and Mood Board are separate skills (Mood Board under Empathize); Work Plan and Setup and Cleanup are separate badges; Construction Kits was the old name for Block Circuits; Physical/Digital Prototype are chart placeholders, not badges; Stitch Craft = hand-needle only, Power Stitch Craft = machine; Hand Tools sits at the bottom of Hand Crafts (order = difficulty, top easy); Chinese names removed. Result: 18 core badges + 2 placeholders + 27 tool skills, every badge with a 5-level depth ladder. AI-drafted rubrics are marked and await James's review.
 
+## D13 — Stage refinements from the d.school review (DECIDED, 2026-07-14)
+Context added: Design Immersion adapts Stanford d.school's cycle, plus Inspire as a two-sided bookend (inbound: get inspired by others' work; outbound: inspire others) — documented in skills/stages.md, now the canonical stage reference. Changes: Inspire badges (Workshop, Service, Digital Storytelling) marked two_sided with both sides described (inbound rubrics remain open); new Driving Question badge under Define (AI-draft ladder), tying the chart to project pages; "Testing" stage renamed "Test"; Mind Map, Reflection, Roleplay summaries clarified to match their stage; Sketching keeps its rough-to-technical arc, summary updated; Work Plan ladder stage lists updated from the old cycle; Inspire column reordered easy-to-hard (Digital Storytelling, Workshop, Service). Chart stays COLUMNAR: circular layout rejected as confusing for young students. Service rename deferred (James deciding).
+
 ## Open questions (carried forward)
 - How many HHH skills appear on a class chart at once — all badges, or domain view that zooms into badges.
 - Which face-blur tool goes in the pipeline.
@@ -53,3 +56,5 @@ James resolved the spreadsheet drift: Heart stage is "Inspire"; "Digital Storyte
 
 ## D12 — Public GitHub repo now; design exploration via Claude Code (DECIDED, 2026-07-12)
 Living Lessons gets its public GitHub repo immediately (curriculum is CC BY 4.0; private data stays out per D3). GitHub doubles as the reading/review interface for the skill files. Claude Design is unavailable (org token limits), so design exploration moves to Claude Code: 2-3 static HTML directions for the class skill chart in design/explorations/, built against design/tokens.css and real skills/ content, evaluated in a browser and ideally on the actual classroom projector.
+- Inbound-side depth rubrics for the two-sided Inspire badges.
+- Service rename (implementation-reach ladder vs 'community service' connotation).

@@ -2,7 +2,7 @@
 id: "gather-feedback"
 name: "Gather Feedback"
 domain: "hand"
-stage: "testing"
+stage: "test"
 wing: null
 group: null
 kind: "core"

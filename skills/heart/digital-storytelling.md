@@ -6,7 +6,8 @@ stage: "inspire"
 wing: null
 group: null
 kind: "core"
-order: 3
+two_sided: true
+order: 1
 summary: "Write an article and post a photo about your project."
 levels_defined: [3, 4, 5]
 ai_drafted_levels: []
@@ -18,6 +19,15 @@ source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 # Digital Storytelling
 
 Write an article and post a photo about your project.
+
+## Two sides of this skill
+
+Inspire is a circle: projects begin when someone else's work lights a spark, and end when your work sparks the next maker. Every Inspire badge has an inbound side (getting inspired) and an outbound side (inspiring others).
+
+- **Inbound (getting inspired):** Read, watch, and listen to media about different topics and makers — articles, videos, and posts that show what's possible.
+- **Outbound (inspiring others):** Write an article and post a photo about your project so other makers can learn from it.
+
+The depth levels below cover the outbound side; inbound rubrics are an open question.
 
 ## Depth levels
 

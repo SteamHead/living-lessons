@@ -7,7 +7,7 @@ wing: null
 group: null
 kind: "core"
 order: 2
-summary: "Using simple props, express your insights into the situations and needs of your subjects."
+summary: "Act out your subjects' situations with simple props to uncover and define the problems they face."
 levels_defined: [2, 3, 4, 5]
 ai_drafted_levels: []
 status: "canonical"
@@ -17,7 +17,7 @@ source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 
 # Roleplay
 
-Using simple props, express your insights into the situations and needs of your subjects.
+Act out your subjects' situations with simple props to uncover and define the problems they face.
 
 ## Depth levels
 

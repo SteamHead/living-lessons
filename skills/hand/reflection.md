@@ -2,12 +2,12 @@
 id: "reflection"
 name: "Reflection"
 domain: "hand"
-stage: "testing"
+stage: "test"
 wing: null
 group: null
 kind: "core"
 order: 2
-summary: "To better understand others, reflect upon your own purpose, biases, viewpoint, and goals."
+summary: "Look back at what you did and why \u2014 what worked, what didn't, and what you'll do differently next time."
 levels_defined: [2, 3, 4, 5]
 ai_drafted_levels: []
 status: "canonical"
@@ -17,7 +17,7 @@ source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 
 # Reflection
 
-To better understand others, reflect upon your own purpose, biases, viewpoint, and goals.
+Look back at what you did and why — what worked, what didn't, and what you'll do differently next time.
 
 ## Depth levels
 

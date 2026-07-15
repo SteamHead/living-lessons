@@ -6,7 +6,8 @@ stage: "inspire"
 wing: null
 group: null
 kind: "core"
-order: 1
+two_sided: true
+order: 2
 summary: "Teach a real class on how to build your project!"
 levels_defined: [1, 2, 3, 4, 5]
 ai_drafted_levels: []
@@ -18,6 +19,15 @@ source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 # Workshop
 
 Teach a real class on how to build your project!
+
+## Two sides of this skill
+
+Inspire is a circle: projects begin when someone else's work lights a spark, and end when your work sparks the next maker. Every Inspire badge has an inbound side (getting inspired) and an outbound side (inspiring others).
+
+- **Inbound (getting inspired):** Do a workshop just to learn — try an activity for its own sake, even if it never joins your project.
+- **Outbound (inspiring others):** Teach a real workshop on how to build your project.
+
+The depth levels below cover the outbound side; inbound rubrics are an open question.
 
 ## Depth levels
 

@@ -8,7 +8,7 @@ Astro content collection validated by a zod schema.
 
     skills/
       heart/    Inspire + Empathize (7 badges)
-      head/     Define + Ideate (6 badges)
+      head/     Define + Ideate (7 badges)
       hand/     Prototype + Testing (5 badges + 2 chart placeholders)
       tools/
         fabrication/   Hand Crafts, Power Tools, Automated Fabrication (12)
@@ -19,11 +19,14 @@ Astro content collection validated by a zod schema.
     id                 slug, unique across all skills
     name               canonical display name
     domain             heart | head | hand   (tool skills are all "hand")
-    stage              core skills: inspire | empathize | define | ideate | prototype | testing
+    stage              core skills: inspire | empathize | define | ideate | prototype | test
     wing               tool skills: fabrication | digital
     group              tool skills: hand-crafts | power-tools | automated-fabrication |
                        circuit-design | media | coding | computer-foundations
     kind               core | tool | placeholder
+    two_sided          Inspire badges only: the skill has an inbound (getting
+                       inspired) and outbound (inspiring others) side; see the
+                       "Two sides" section in those files
     order              position within its stage/group column (1 = top = easier;
                        bottom = harder)
     summary            one-line badge description
@@ -33,6 +36,8 @@ Astro content collection validated by a zod schema.
                        or an unresolved question)
     flags              provenance notes and open questions
     source             provenance
+
+Stage definitions and placement rules live in `stages.md`.
 
 ## Depth levels
 

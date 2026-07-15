@@ -7,17 +7,17 @@ wing: null
 group: null
 kind: "core"
 order: 1
-summary: "Drawing rough drafts of solutions you think of; only good enough to convey general meanings."
+summary: "Draw your ideas \u2014 starting with quick rough sketches that capture a thought, growing into technical drawings someone else could build from."
 levels_defined: [1, 2, 3, 4, 5]
 ai_drafted_levels: [5]
 status: "needs-review"
-flags: ["Rubrics from 'Drafting' in the old progression sheet."]
+flags: ["Rubrics from 'Drafting' in the old progression sheet.", "Summary embraces the rough-sketch-to-technical-drawing arc per 2026-07-14 review."]
 source: "Badges_Design_Immersion_Web_Post.xlsx + 2026-07-12 revision"
 ---
 
 # Sketching
 
-Drawing rough drafts of solutions you think of; only good enough to convey general meanings.
+Draw your ideas — starting with quick rough sketches that capture a thought, growing into technical drawings someone else could build from.
 
 ## Depth levels
 
