@@ -13,6 +13,7 @@ data and planning documents. Application code comes later.
 
 | Path | What it is |
 |---|---|
+| `guides/` | Human-facing how-tos: writing hexagons, the git workflow, reviewing AI drafts, glossary. |
 | `hexagons/` | Hexagon Activity Library: reusable classroom activities that grant 1-3 skill badges each. [Schema](hexagons/_README.md). |
 | `skills/` | 47 canonical skill files: 18 core badges, 2 chart placeholders, 27 tool skills — each with a 5-level depth ladder. [Start here](skills/_README.md). |
 | `docs/decisions.md` | Running architecture & taxonomy decision log |
