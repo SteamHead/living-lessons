@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "skills/tools/digital/3d-modeling.md",
+                "file": "skills/tools/fabrication/block-circuits.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "3d-modeling"
+              "title": "block-circuits"
             }
           }
         ]
@@ -183,16 +183,20 @@
       "bases:Create new base": false
     }
   },
-  "active": "79470f2b08f7ce3e",
+  "active": "eefc5e73838b8a8a",
   "lastOpenFiles": [
+    "skills/tools/fabrication/electro-craft.md",
+    "skills/tools/fabrication/block-circuits.md",
+    "docs/skills-changelog-2026-07-14.md",
+    "docs/skills-changelog-2026-07-15.md",
+    "docs/skills-changelog-2026-07-12.md",
+    "docs/project-instructions.md",
+    "skills/tools/digital/3d-modeling.md",
     "skills/heart/media-explorer.md",
     "skills/heart/learning-station.md",
     "skills/heart/field-trip.md",
-    "docs/skills-changelog-2026-07-15.md",
     "skills/head/driving-question.md",
     "skills/stages.md",
-    "docs/skills-changelog-2026-07-14.md",
-    "docs/project-instructions.md",
     "docs/decisions.md",
     "CLAUDE.md",
     "README.md"
