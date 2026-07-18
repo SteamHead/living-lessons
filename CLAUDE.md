@@ -10,6 +10,9 @@ exploration — no application code yet.**
   Source of truth. See `skills/_README.md` for the schema. AI-drafted rubric
   levels are marked and listed in `ai_drafted_levels`; do not silently rewrite
   canonical text.
+- `hexagons/` — the Hexagon Activity Library (reusable activities granting 1-3
+  badges each). Schema and rules in `hexagons/_README.md`; badge ids must exist
+  in `skills/`; no names of people anywhere in hexagon files.
 - `docs/` — project brief context: decisions log, project instructions, changelogs.
 - `design/` — design brief, brand tokens, and static HTML design explorations.
 

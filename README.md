@@ -13,6 +13,7 @@ data and planning documents. Application code comes later.
 
 | Path | What it is |
 |---|---|
+| `hexagons/` | Hexagon Activity Library: reusable classroom activities that grant 1-3 skill badges each. [Schema](hexagons/_README.md). |
 | `skills/` | 47 canonical skill files: 18 core badges, 2 chart placeholders, 27 tool skills — each with a 5-level depth ladder. [Start here](skills/_README.md). |
 | `docs/decisions.md` | Running architecture & taxonomy decision log |
 | `docs/project-instructions.md` | Instructions for the Claude planning project |
@@ -28,6 +29,13 @@ Tools** (plus a standalone Computer Foundations group). Every skill tracks
 **experience** (times a class practiced it) and **depth** (a 5-level rubric
 ladder: Introductory → Early → Preparatory → Intermediate → Advanced) —
 separately, never merged.
+
+## Product names
+
+**The Living Lessons** is the projected experience a class sees together on
+the classroom display — hexagon activities plus screens like the Class
+Journal. **The Living Studio** is the teacher's interface, where additional
+detail is viewable and editable.
 
 ## License
 
