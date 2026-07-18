@@ -13,6 +13,8 @@ exploration — no application code yet.**
 - `hexagons/` — the Hexagon Activity Library (reusable activities granting 1-3
   badges each). Schema and rules in `hexagons/_README.md`; badge ids must exist
   in `skills/`; no names of people anywhere in hexagon files.
+- `protocols/` — reusable classroom methods (sharing/feedback/grouping),
+  referenced from lesson phases by id. Schema in `protocols/_README.md`.
 - `guides/` — human-facing how-tos (hexagon authoring, git workflow, AI-draft
   review, glossary). Keep these current when workflows change.
 - `docs/` — project brief context: decisions log, project instructions, changelogs.

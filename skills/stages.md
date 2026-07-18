@@ -67,3 +67,14 @@ The closing bookend: students put their work into the world to inspire others.
 to build it), and **Service** (install it in a real-world location). Each Share
 badge is the outbound twin of a Get Inspired badge — the circle closing, as one
 class's Share becomes another maker's inspiration.
+
+
+## Note: Living Lessons phase labels
+
+The projected Living Lessons interface groups the seven skill-stages into **six
+teaching phases** on the hexagon rail, tuned for classroom flow rather than the
+full taxonomy: **Inspire, Explore, Mini-Lesson, Challenge, Reflect, Share.**
+Inspire and Share are the Heart bookends; Explore maps to Empathize/discovery;
+Mini-Lesson and Challenge carry Define/Ideate/Prototype; Reflect carries Test
+and folds in the lesson-close Badges step. This is a presentation grouping — the
+skill taxonomy above is unchanged.
