@@ -12,7 +12,7 @@ Astro content collection validated by a zod schema.
       hand/     Prototype + Test (5 badges + 2 chart placeholders)
       tools/
         fabrication/   Hand Crafts, Power Tools, Automated Fabrication (12)
-        digital/       Circuit Design, Media, Coding, Computer Foundations (15)
+        digital/       Circuit Design, Media, Coding, Computer Foundations (14)
 
 ## Frontmatter schema
 
