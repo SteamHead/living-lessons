@@ -12,7 +12,7 @@ audience: self
 sessions: 1
 build_time: "25-30 min"
 sequence:
-  before: [hex-simple-circuits]
+  before: [hex-simple-circuits, hex-copper-tape-circuit]
   after: [hex-cardboard-controller]
 project_tags: [electronics, coding, imagination-fair-feeder, independence]
 materials: [makeymakey-kits, alligator-clips, foil, metal-objects, laptops]
