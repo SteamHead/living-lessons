@@ -14,7 +14,7 @@ sessions: 1
 build_time: "20-25 min"
 sequence:
   before: []
-  after: [hex-client-box, hex-attachment-poster]
+  after: [hex-client-box, hex-attachment-poster, hex-build-to-your-spec]
 project_tags: [tool-license, safety, station]
 materials: [cardboard-cutters, cardboard, surface-protection, pencils]
 reflection_default: tier1

@@ -14,7 +14,7 @@ sessions: 1
 build_time: "25-30 min"
 sequence:
   before: [hex-cardboard-cutter-license, hex-hot-glue-license]
-  after: []
+  after: [hex-design-challenge-client]
 project_tags: [cardboard, clients, empathy, first-client, measurement]
 materials:
   [cardboard, cardboard-cutters, hot-glue-guns, rulers, pencils, box-templates]

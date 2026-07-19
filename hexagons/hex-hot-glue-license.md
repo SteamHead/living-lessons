@@ -14,7 +14,7 @@ sessions: 1
 build_time: "20-25 min"
 sequence:
   before: []
-  after: [hex-client-box]
+  after: [hex-client-box, hex-build-to-your-spec]
 project_tags: [tool-license, safety, station]
 materials: [hot-glue-guns, glue-sticks, cardboard, control-worksheets, popsicle-sticks]
 reflection_default: tier1
