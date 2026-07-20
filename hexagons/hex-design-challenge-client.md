@@ -11,7 +11,7 @@ badges:
     level: 2
 skills_touched: [card-craft, gather-feedback, setup-and-cleanup, work-plan, reflection]
 grades: ["K", "1", "2", "3", "4", "5"]
-audience: community
+audience: family
 sessions: 3
 build_time: "30-40 min per session"
 sequence:
@@ -26,8 +26,7 @@ flags:
   [
     "AI draft of the evolved deck Hexagon 16 (2025-26 ran it with real named clients and requirement sheets; genericized per D6). Written client-agnostic and re-runnable — the client list changes every run.",
     "sessions: 3 is the full arc; per James it runs 1-3 sessions with fewer for younger grades — compress by folding sessions 1-2 together and trimming the exhibition. Grade floor K flagged as guessed.",
-    "audience: community (teacher-recruited clients); per James clients may instead be at-home relatives — family is the alternate enum value, single-enum limitation noted.",
-    "Uses the proposed Stretch Goal section (schema addition proposed in this PR, pending planning-side landing in hexagons/_README.md).",
+    "audience: family per D23 ruling (choose, don't list) — clients are teacher-recruited community members OR at-home relatives; family chosen as the primary.",
     "Base material is teacher's call per class (paper for younger/newer hands, cardboard where licenses are earned) — deliberately NOT encoded structurally.",
   ]
 source: "SHTeam Labs Hexagon PPT 2025-26, Hexagon 16 + Hexagon deck 2025-26 (Design Guide)"

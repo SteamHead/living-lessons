@@ -23,8 +23,7 @@ flags:
   [
     "AI draft; net-new activity — the 4-5 half of the make-for-yourself pair (K-3 half is hex-make-for-yourself; parallel variants, not sequence-linked to each other). Structure per James 2026-07-18: constraint cards + self-authored spec, with the spec REFLECTIVE (self-scored at the end, no teacher evaluation), and forced iteration demoted to the Stretch Goal.",
     "constraint-cards is an external classroom material James already owns, referenced by name only; a printable-PDF link may be added later — leave the material id stable.",
-    "Uses the proposed Stretch Goal section (schema addition pending).",
-    "Stretch Goal revision, when it happens, is Gather Feedback territory (L1-2); not claimed as a badge since it's conditional — add it if a class makes the stretch routine.",
+    "Per D22, the Stretch Goal revision carries no badge evidence by rule.",
   ]
 source: "James, 2026-07-18 planning chat (3A)"
 ---
@@ -86,7 +85,7 @@ neighbor and each check the other's build cold.
 
 ## Stretch Goal
 
-Finished and self-checked? Bring your build and spec to the teacher — they'll
+Finished early? Once your self-check is done, bring your build and spec to the teacher — they'll
 request exactly ONE change, like a real client would. Make the revision and
 note on your spec what changed and why. That's version 2, and version 2 is
 where engineering actually lives.
