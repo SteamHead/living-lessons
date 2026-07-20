@@ -11,9 +11,9 @@ sessions: 1
 build_time: "15-20 min"
 sequence:
   before: []
-  after: [hex-copper-tape-circuit, hex-space-station-modules, hex-makeymakey-inputs]
+  after: [hex-space-station-modules, hex-makeymakey-inputs]
 project_tags: [electronics, circuits, discovery, led]
-materials: [coin-batteries, leds-assorted-colors, tape]
+materials: [coin-batteries, leds, tape]
 reflection_default: tier1
 status: draft
 flags: ["AI draft from James's description + LED Space lesson notes; field-run in class. K-2 continuation (paper modules + LED purpose) lives in hex-space-station-modules — consider adding hex-simple-circuits to that file's sequence.before. G3-5 forward-voltage numbers worth a fact-check before teaching."]

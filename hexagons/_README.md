@@ -21,7 +21,7 @@ badges:                        # 1-3, shown to students; ids must exist in skill
     level: 1
 skills_touched: [learning-station, gather-feedback]  # teacher-only; see rules
 grades: ["1", "2", "3", "4", "5"]   # strings; "K" allowed
-audience: classmate            # self | classmate | younger-students | school-staff | community | family
+audience: classmate            # EXACTLY ONE of: self | classmate | younger-students | school-staff | community | family (D23: choose, don't list)
 sessions: 1
 build_time: "12-15 min"        # active build block within the session
 sequence:                      # suggested, never enforced
@@ -36,7 +36,9 @@ source: "SHTeam Labs Hexagon deck 2025-26"
 ```
 
 Rules:
-- `badges` max 3; if an activity needs more, split the hexagon.
+- `badges` max 3; if an activity needs more, split the hexagon. **Badges are
+  defaults**: during class the teacher can swap skill or level from the Living
+  Lessons interface; the class completion record stores badges-as-taught (D17).
 - Every badge carries a `level` (1–5) matching the skill's depth ladder. This
   is the mechanism behind "repeats deepen": the class chart records experience
   on every completion, and depth advances when a hexagon at a higher level is
@@ -78,11 +80,16 @@ Rules:
 5. **Floor & Ceiling** — guaranteed entry point for every learner; extension
    for fast/deep achievers (prefer extensions that help others or the shared
    build over "make more").
-6. **Badge Evidence** — per badge, what the teacher must observe to grant it
+6. **Stretch Goal** *(optional)* — one bounded task for early finishers,
+   distinct from Ceiling: Ceiling makes the *same challenge* deeper; a Stretch
+   Goal is what you do when the challenge is *done*. One short paragraph,
+   starting "Finished early?" by convention. **Carries no badge evidence**
+   (same rule as Tier 3 reflection) — it's a next task, not an assessment rung.
+7. **Badge Evidence** — per badge, what the teacher must observe to grant it
    at the stated level. Written to echo the skill's rubric language. Look-fors,
    not tests. (When a skill's rubric is revised, check its hexagons' evidence
    sections — they go stale silently.)
-7. **Reflection Menu** — three tiers; teacher picks in the moment; prompts may
+8. **Reflection Menu** — three tiers; teacher picks in the moment; prompts may
    run mid-lesson. The tiers deliberately climb the Reflection badge's own
    ladder (Tier 1 ≈ L1 name-how-it-went … Tier 3 ≈ journal/evidence).
    - **Tier 1 — Whole-class pulse (2 min):** hand-raise / thumbs / popcorn.
@@ -90,7 +97,7 @@ Rules:
      table walk.
    - **Tier 3 — Independent (when ready):** written or photo/video evidence
      (e.g., Google Classroom upload).
-8. **Re-entry Prompt** — only if `sessions > 1`.
+9. **Re-entry Prompt** — only if `sessions > 1`.
 
 ## Naming
 

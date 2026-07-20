@@ -13,10 +13,11 @@ data and planning documents. Application code comes later.
 
 | Path | What it is |
 |---|---|
+| `materials/` | Canonical ids for physical materials referenced by hexagons. [Registry](materials/_README.md). |
 | `protocols/` | Reusable classroom methods (sharing, feedback, grouping) referenced by lessons. [Schema](protocols/_README.md). |
 | `guides/` | Human-facing how-tos: writing hexagons, the git workflow, reviewing AI drafts, glossary. |
 | `hexagons/` | Hexagon Activity Library: reusable classroom activities that grant 1-3 skill badges each. [Schema](hexagons/_README.md). |
-| `skills/` | 47 canonical skill files: 18 core badges, 2 chart placeholders, 27 tool skills — each with a 5-level depth ladder. [Start here](skills/_README.md). |
+| `skills/` | 50 canonical skill files: 22 core badges, 2 chart placeholders, 26 tool skills — each with a 5-level depth ladder. [Start here](skills/_README.md). |
 | `docs/decisions.md` | Running architecture & taxonomy decision log |
 | `docs/project-instructions.md` | Instructions for the Claude planning project |
 | `design/design-brief.md` | Design brief for the projected interface |
