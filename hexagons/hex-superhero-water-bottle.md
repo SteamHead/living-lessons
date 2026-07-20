@@ -26,7 +26,6 @@ flags:
     "Per James this is a lead-up to hex-design-challenge-client but deliberately NOT sequence-linked.",
     "Grades set wide per James; grade 1 floor guessed. Base material paper-or-cardboard is the teacher's on-the-fly call, not encoded.",
     "audience: self (the superhero client is imagined, not a real person the maker serves) — review if that reads wrong.",
-    "Uses the proposed Stretch Goal section (schema addition pending).",
   ]
 source: "SHTeam Labs Hexagon PPT 2025-26, Hexagon 19 + Hexagon deck 2025-26"
 ---

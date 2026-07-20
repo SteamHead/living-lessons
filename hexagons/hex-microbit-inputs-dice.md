@@ -12,7 +12,7 @@ sessions: 1
 build_time: "25-35 min"
 sequence:
   before: [hex-microbit-flashing-heart]
-  after: [hex-microbit-counter]
+  after: [hex-microbit-counter, hex-arcade-escape-room]
 project_tags: [microbit, coding, electronics, inputs, dice, independence]
 materials: [microbits, laptops, usb-cables, batteries]
 reflection_default: tier2

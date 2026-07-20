@@ -25,7 +25,6 @@ flags:
     "AI draft; net-new activity (no deck legacy_number) — the K-3 half of the make-for-yourself pair James specified 2026-07-18; the 4-5 half is hex-build-to-your-spec. Deliberately NOT sequence-linked to it (parallel grade variants, not a progression).",
     "Paper is the default base for these grades; cardboard on the table as the alternative for classes/kids who want it (grade 1 classes have done cardboard!) — teacher's on-the-fly call, not encoded.",
     "card-craft L2 evidence assumes the paper path (scissors, tape, templates); a cardboard class is working above the claimed rung, which is fine — badge the level demonstrated.",
-    "Uses the proposed Stretch Goal section (schema addition pending).",
   ]
 source: "James, 2026-07-18 planning chat (3A) — evolved from deck Maker-Mindset self-project threads"
 ---

@@ -14,7 +14,7 @@ sessions: 1
 build_time: "30-40 min"
 sequence:
   before: [hex-microbit-inputs-dice]
-  after: []
+  after: [hex-campus-sensor-network]
 project_tags: [microbit, coding, electronics, sensors, counter, data, independence]
 materials: [microbits, laptops, usb-cables, batteries, alligator-clips]
 reflection_default: tier2

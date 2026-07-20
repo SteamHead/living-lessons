@@ -11,7 +11,7 @@ sessions: 1
 build_time: "15-20 min"
 sequence:
   before: []
-  after: [hex-space-station-modules, hex-makeymakey-inputs]
+  after: [hex-copper-tape-circuit, hex-space-station-modules, hex-makeymakey-inputs]
 project_tags: [electronics, circuits, discovery, led]
 materials: [coin-batteries, leds, tape]
 reflection_default: tier1
