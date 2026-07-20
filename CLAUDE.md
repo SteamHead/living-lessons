@@ -1,8 +1,7 @@
 # CLAUDE.md — Living Lessons (draft)
 
 Living Lessons is an interactive teaching, documentation, and reflection system
-for SteamHead makerspace classes. **Current phase: planning and design
-exploration — no application code yet.**
+for SteamHead makerspace classes. **Current phase: IMPLEMENTATION.** Planning is complete (D1-D25). App code is built in its own top-level folder; content libraries stay clean and forkable. New contributors read CLAUDE-CODE-HANDOFF.md first. Planning is complete (D1-D25). App code is now being built in `app/` (or `src/`). See CLAUDE-CODE-HANDOFF.md for the first-session brief.
 
 ## What lives here (public repo)
 
@@ -24,6 +23,16 @@ exploration — no application code yet.**
 
 Private data (class records, student media, rosters) NEVER goes in this repo —
 it will live in Cloudflare D1/R2 behind auth. See `docs/decisions.md` D3–D6.
+
+## Stack (implementation phase)
+
+Astro on Cloudflare Workers, markdown content collections validated by zod —
+mirroring the `steamhead-site-rebuild` repo (the proven template; clone it
+alongside this one). App code lives in its own top-level folder (`app/` or
+`src/`); the content folders (`skills/`, `hexagons/`, `protocols/`, `classes/`,
+`materials/`) are the source of truth, their shapes fixed by each folder's
+`_README.md`. Private/runtime data (badge grants, posts, media) will live in
+Cloudflare D1/R2, never in git (D3) — and is deferred past the first milestones.
 
 ## Working rules for AI assistants
 

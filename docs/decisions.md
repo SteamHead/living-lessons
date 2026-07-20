@@ -85,6 +85,14 @@ A new optional body section, **Stretch Goal**, between Floor & Ceiling and Badge
 ## D24 — Materials registry (DECIDED, 2026-07-19)
 Canonical material ids live in `materials/_README.md`; hexagon `materials:` entries validate against it (zod **soft-warn**, not hard-fail, so authoring stays fast). Prevents id drift (merged the live `leds` / `leds-assorted-colors` duplicate on landing). Seeded from the current ~28-material inventory. Each id can later carry a prep note or printable-PDF link (e.g. `constraint-cards`, James-owned). Same library-earns-its-place logic as skills/hexagons/protocols.
 
+## D25 — Claude Code handoff: implementation begins; one repo, content + app (DECIDED, 2026-07-20)
+Planning phase closes; implementation begins in Claude Code. Decisions locked for the handoff:
+- **First milestone proves the content pipeline**, not visible UI: Astro reads real skills/ and hexagons/ markdown via zod-validated content collections and renders a hexagon list, a skill list, and one hexagon detail page at localhost, deploying to a Worker preview. No Stage Rail, DB, or auth in M1. Full brief in CLAUDE-CODE-HANDOFF.md.
+- **One repo, content + app.** Living Lessons app code is added to THIS repo (not a third repo), in its own top-level folder (app/ or src/) so the CC-BY content folders stay clean and independently forkable. This **amends D10**: the "sibling repo" relationship is Living-Lessons-beside-the-marketing-site (two products), NOT app-beside-content (one product). The public/private split (D3) is a STORAGE boundary (markdown in git vs D1/R2), never a repo boundary.
+- **Rebuild prototypes as components**, don't port the raw HTML; keep design/explorations/*.html as the visual reference and design/tokens.css for brand tokens.
+- **Follow steamhead-site-rebuild as the template** (Astro config, collection/zod patterns, Wrangler setup); both repos cloned locally; Claude Code may propose deviations rather than diverging silently.
+- **Defer all private/runtime infrastructure** (Cloudflare D1, R2, auth, image/blur pipeline, badge-swap writes, computed skill chart) to a later milestone once the read-only markdown-rendering slices work.
+
 ## Open questions (carried forward)
 - How many HHH skills appear on a class chart at once — all badges, or domain view that zooms into badges.
 - Which face-blur tool goes in the pipeline.
