@@ -1,0 +1,40 @@
+{
+  "pacific": {
+    "projection": "equalEarth",
+    "centralMeridian": 145.5,
+    "scale": 345.81749468460134,
+    "translate": [
+      936,
+      475.88426396145496
+    ],
+    "viewBox": [
+      0,
+      0,
+      1920,
+      867
+    ],
+    "latitudeRange": [
+      -58,
+      84
+    ]
+  },
+  "atlantic": {
+    "projection": "equalEarth",
+    "centralMeridian": -10,
+    "scale": 345.81749468460134,
+    "translate": [
+      936,
+      475.88426396145496
+    ],
+    "viewBox": [
+      0,
+      0,
+      1920,
+      867
+    ],
+    "latitudeRange": [
+      -58,
+      84
+    ]
+  }
+}

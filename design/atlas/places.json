@@ -1,0 +1,128 @@
+{
+  "_readme": [
+    "Where SteamHead has taught. This file drives the Atlas map's country labels,",
+    "region highlights, and city dots. Edit it, then re-run `npm run build`.",
+    "",
+    "James's list as of 2026-09-02; the Big Island and UK gaps are now filled.",
+    "Istanbul and Astana are confirmed for December 2026 but have not happened",
+    "yet, so they stay status:planned (hollow outline) until they have.",
+    "",
+    "highlight:  'regions' = fill only the listed admin-1 units (big countries)",
+    "            'whole'   = fill the whole country (small countries)",
+    "            'none'    = no fill; the label and city dots carry it",
+    "status:     'taught' = we have run classes here",
+    "            'planned' = booked or coming soon (drawn as a hollow outline);",
+    "                        add 'when' as YYYY-MM once the date is known",
+    "regions:    Natural Earth admin-1 `name` values, exactly as spelled there.",
+    "label:      short name for the on-screen label. Keep it SHORT — this is read",
+    "            from 30 feet. 'USA' not 'United States of America'.",
+    "label_at:   [lng, lat] anchor for the label. Omit to use the country centroid.",
+    "leader:     true = draw a short line from the label to the country (used for",
+    "            the crowded European cluster, where labels sit out in the water).",
+    "",
+    "Nothing in this file is private data: cities and countries only, no schools,",
+    "no people, no rosters (see docs/decisions.md D6)."
+  ],
+
+  "countries": [
+    {
+      "iso_n3": "840", "label": "USA", "highlight": "regions", "status": "taught",
+      "regions": ["California", "Arizona", "Texas", "Massachusetts", "Hawaii"],
+      "label_at": [-99, 41]
+    },
+    {
+      "iso_n3": "124", "label": "Canada", "highlight": "regions", "status": "taught",
+      "regions": ["Alberta"],
+      "label_at": [-100, 60]
+    },
+    {
+      "iso_n3": "156", "label": "China", "highlight": "regions", "status": "taught",
+      "regions": ["Guangdong", "Beijing", "Fujian"],
+      "label_at": [101, 37]
+    },
+    {
+      "iso_n3": "410", "label": "S. Korea", "highlight": "whole", "status": "taught",
+      "label_at": [137, 27], "leader": true
+    },
+    {
+      "iso_n3": "704", "label": "Vietnam", "highlight": "whole", "status": "taught",
+      "label_at": [113, 9], "leader": true
+    },
+    {
+      "iso_n3": "360", "label": "Indonesia", "highlight": "none", "status": "taught",
+      "label_at": [124, -11]
+    },
+    {
+      "iso_n3": "144", "label": "Sri Lanka", "highlight": "whole", "status": "taught",
+      "label_at": [83, -2], "leader": true
+    },
+    {
+      "iso_n3": "064", "label": "Bhutan", "highlight": "whole", "status": "taught",
+      "label_at": [88, 38], "leader": true
+    },
+    {
+      "iso_n3": "203", "label": "Czechia", "highlight": "whole", "status": "taught",
+      "label_at": [26, 62], "leader": true
+    },
+    {
+      "iso_n3": "826", "label": "UK", "highlight": "whole", "status": "taught",
+      "label_at": [-33, 63], "leader": true
+    },
+    {
+      "iso_n3": "724", "label": "Spain", "highlight": "whole", "status": "taught",
+      "label_at": [8, 34], "leader": true
+    },
+    {
+      "iso_n3": "620", "label": "Portugal", "highlight": "whole", "status": "taught",
+      "label_at": [-8, 28], "leader": true
+    },
+    {
+      "iso_n3": "792", "label": "Turkey", "highlight": "whole", "status": "planned",
+      "label_at": [37, 41], "leader": true
+    },
+    {
+      "iso_n3": "398", "label": "Kazakhstan", "highlight": "whole", "status": "planned",
+      "label_at": [66, 48]
+    }
+  ],
+
+  "cities": [
+    { "name": "Calgary",        "iso_n3": "124", "lat": 51.045, "lng": -114.057, "status": "taught" },
+    { "name": "San Francisco",  "iso_n3": "840", "lat": 37.775, "lng": -122.419, "status": "taught" },
+    { "name": "San Marcos",     "iso_n3": "840", "lat": 33.144, "lng": -117.166, "status": "taught" },
+    { "name": "Yucca Valley",   "iso_n3": "840", "lat": 34.114, "lng": -116.432, "status": "taught" },
+    { "name": "Tucson",         "iso_n3": "840", "lat": 32.222, "lng": -110.975, "status": "taught" },
+    { "name": "Houston",        "iso_n3": "840", "lat": 29.760, "lng":  -95.370, "status": "taught" },
+    { "name": "Brownsville",    "iso_n3": "840", "lat": 25.902, "lng":  -97.498, "status": "taught" },
+    { "name": "Boston",         "iso_n3": "840", "lat": 42.360, "lng":  -71.058, "status": "taught" },
+    { "name": "Kailua-Kona",       "iso_n3": "840", "lat": 19.639, "lng": -155.997, "status": "taught" },
+    { "name": "Holualoa",          "iso_n3": "840", "lat": 19.621, "lng": -155.949, "status": "taught",
+      "check": "James wrote 'hulua loa'. Holualoa is the town above Kailua-Kona — correct this if it is the wrong place." },
+    { "name": "Honaunau-Napoopoo", "iso_n3": "840", "lat": 19.425, "lng": -155.896, "status": "taught" },
+    { "name": "Lisbon",         "iso_n3": "620", "lat": 38.722, "lng":   -9.139, "status": "taught" },
+    { "name": "Madrid",         "iso_n3": "724", "lat": 40.417, "lng":   -3.704, "status": "taught" },
+    { "name": "London",        "iso_n3": "826", "lat": 51.507, "lng":   -0.128, "status": "taught" },
+    { "name": "Hackney",       "iso_n3": "826", "lat": 51.545, "lng":   -0.055, "status": "taught" },
+    { "name": "Cambridge",     "iso_n3": "826", "lat": 52.205, "lng":    0.119, "status": "taught" },
+    { "name": "Prague",         "iso_n3": "203", "lat": 50.076, "lng":   14.437, "status": "taught" },
+    { "name": "Brno",           "iso_n3": "203", "lat": 49.195, "lng":   16.608, "status": "taught" },
+    { "name": "Istanbul",       "iso_n3": "792", "lat": 41.008, "lng":   28.978, "status": "planned", "when": "2026-12" },
+    { "name": "Astana",         "iso_n3": "398", "lat": 51.169, "lng":   71.449, "status": "planned", "when": "2026-12" },
+    { "name": "Thimphu",        "iso_n3": "064", "lat": 27.472, "lng":   89.639, "status": "taught" },
+    { "name": "Colombo",        "iso_n3": "144", "lat":  6.927, "lng":   79.861, "status": "taught" },
+    { "name": "Beijing",        "iso_n3": "156", "lat": 39.904, "lng":  116.407, "status": "taught" },
+    { "name": "Fuzhou",         "iso_n3": "156", "lat": 26.074, "lng":  119.296, "status": "taught" },
+    { "name": "Guangzhou",      "iso_n3": "156", "lat": 23.129, "lng":  113.264, "status": "taught" },
+    { "name": "Shenzhen",       "iso_n3": "156", "lat": 22.543, "lng":  114.058, "status": "taught" },
+    { "name": "Seoul",          "iso_n3": "410", "lat": 37.567, "lng":  126.978, "status": "taught" },
+    { "name": "Busan",          "iso_n3": "410", "lat": 35.180, "lng":  129.076, "status": "taught" },
+    { "name": "Ho Chi Minh City","iso_n3": "704","lat": 10.823, "lng":  106.630, "status": "taught" },
+    { "name": "Jakarta",        "iso_n3": "360", "lat": -6.208, "lng":  106.846, "status": "taught" }
+  ],
+
+  "oceans": [
+    { "label": "PACIFIC OCEAN",  "at": [-138, -12] },
+    { "label": "ATLANTIC OCEAN", "at": [-40, 32]  },
+    { "label": "INDIAN OCEAN",   "at": [78, -28]  }
+  ]
+}

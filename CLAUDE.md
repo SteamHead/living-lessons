@@ -20,6 +20,8 @@ for SteamHead makerspace classes. **Current phase: IMPLEMENTATION.** Planning is
   review, glossary). Keep these current when workflows change.
 - `docs/` — project brief context: decisions log, project instructions, changelogs.
 - `design/` — design brief, brand tokens, and static HTML design explorations.
+  `design/atlas/` holds the generated Atlas base map: edit `places.json` and
+  re-run the build, never hand-edit the SVG. See `design/atlas/_README.md`.
 
 Private data (class records, student media, rosters) NEVER goes in this repo —
 it will live in Cloudflare D1/R2 behind auth. See `docs/decisions.md` D3–D6.
@@ -36,6 +38,13 @@ Cloudflare D1/R2, never in git (D3) — and is deferred past the first milestone
 
 ## Working rules for AI assistants
 
+- **Push back on requests that won't work.** James is a customer, not a spec:
+  he does not always know what he wants, and a request that has a problem
+  should not be built as literally asked. When you see the issue, either fix it
+  and show the result with the reasoning, or ask first — your judgement which.
+  What is NOT acceptable is implementing something you can see is wrong and
+  staying quiet about it. (Standing example: "zoom to a 1 km x 1 km area" on a
+  world base map, which has no detail below ~20 km — see D27.)
 - Read `docs/decisions.md` before proposing architecture; don't relitigate
   decided items, do flag new implicit decisions.
 - AI-generated content is reviewed by a human before merging — same PR

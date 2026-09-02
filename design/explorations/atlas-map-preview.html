@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas base map · preview and legibility test</title>
+<!--
+  ============================================================================
+  ATLAS BASE MAP · preview harness
+  Not a screen design — a rig for judging design/atlas/atlas-map-*.svg before
+  it goes into the Atlas. Three things to look at:
+
+   1. FRAMING. Pacific-centred (145.5°E) is the CHOSEN framing: San Francisco
+      and Shenzhen face each other across one ocean. Atlantic-centred (10°W) is
+      kept alongside for comparison — same data, same code, one parameter
+      apart. See design/atlas/build-atlas-map.mjs.
+   2. THE SQUINT TEST. The panel at the bottom shrinks the map to the visual
+      angle it will actually have from the middle and the back of a 30-foot
+      classroom. If a label dies there, it dies on the TV.
+   3. PIN REGISTRATION. The four cities from classes/ are placed by the same
+      portable Equal Earth transform the app will use. If a pin sits in the
+      sea, the transform is wrong.
+  ============================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#F1D302; --orange:#EDA83E; --teal:#5EB1BF;
+  --acc-or:#EF7B44; --acc-bl:#409FCD;
+  --dark:#474747; --gray:#D7D7D7; --light:#F4F4F4; --white:#fff;
+  --disp:'Varela Round',system-ui,sans-serif; --body:'Montserrat',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--light);color:#2b2b2b;font-family:var(--body);padding:26px 32px 60px}
+h1{font-family:var(--disp);font-size:30px}
+h1 small{display:block;font-family:var(--body);font-weight:600;font-size:13px;
+  letter-spacing:.14em;text-transform:uppercase;color:#8a8a8a}
+h2{font-family:var(--disp);font-size:20px;margin:34px 0 4px}
+p.note{font-size:14px;line-height:1.55;max-width:78ch;color:#5a5a5a;margin:6px 0 14px}
+p.note b{color:#2b2b2b}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.controls button{border:0;background:var(--white);border-radius:12px;padding:10px 16px;
+  font-family:inherit;font-weight:800;font-size:15px;box-shadow:0 2px 0 var(--gray);cursor:pointer}
+.controls button.on{background:var(--yellow);box-shadow:0 2px 0 #c9b100}
+.controls .sep{width:1px;height:26px;background:var(--gray);margin:0 6px}
+
+/* The map card. Ocean colour behind the image so there is no pale flash while
+   a 380 KB SVG decodes. */
+#stage{position:relative;background:#1E5C6B;border-radius:22px;overflow:hidden;
+  box-shadow:0 3px 0 var(--gray)}
+#stage img{display:block;width:100%;height:auto}
+#pins{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-100%);text-align:center;pointer-events:auto}
+.pin .hex{width:52px;height:58px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:var(--yellow);display:grid;place-items:center;font-family:var(--disp);
+  font-size:20px;margin:0 auto;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.pin .lbl{font-weight:800;font-size:13px;background:var(--white);border-radius:999px;
+  padding:2px 10px;margin-top:4px;display:inline-block;white-space:nowrap;
+  box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.pin.hide{display:none}
+
+/* Squint test. Shrinking the map by N is optically the same as standing N times
+   further away, so these thumbnails are the honest preview of the classroom. */
+.squint{display:flex;gap:34px;align-items:flex-start;flex-wrap:wrap;margin-top:10px}
+.squint figure{margin:0}
+.squint img{display:block;background:#1E5C6B;border-radius:6px;box-shadow:0 2px 0 var(--gray)}
+.squint figcaption{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#8a8a8a;margin-top:8px;max-width:22ch;line-height:1.5}
+.legend{display:flex;gap:22px;flex-wrap:wrap;margin:14px 0 0;font-size:14px;font-weight:600}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:26px;height:16px;border-radius:4px;border:2px solid #2E3A3E;display:inline-block}
+</style>
+</head><body>
+
+<h1>The Atlas base map<small>Preview · SteamHead Living Lessons</small></h1>
+
+<div class="controls">
+  <button id="b-pacific" class="on" onclick="setVariant('pacific')">Pacific-centred (145.5°E) · chosen</button>
+  <button id="b-atlantic" onclick="setVariant('atlantic')">Atlantic-centred (10°W)</button>
+  <span class="sep"></span>
+  <button id="b-pins" class="on" onclick="togglePins()">Class pins</button>
+</div>
+
+<div id="stage">
+  <img id="basemap" src="../atlas/atlas-map-pacific.svg"
+       alt="World map of everywhere SteamHead has taught">
+  <div id="pins"></div>
+</div>
+
+<div class="legend">
+  <span><i style="background:#F1D302"></i> where we have taught</span>
+  <span><i style="background:#fff;border-style:dashed;border-color:#F2B705"></i> booked / coming soon</span>
+  <span><i style="background:#EF7B44;border-radius:50%;width:16px"></i> a city on the list</span>
+  <span><i style="background:#F1D302;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);border:0;width:16px;height:18px"></i> a class you can open</span>
+</div>
+
+<h2>The squint test</h2>
+<p class="note">
+  An 85&#8243; TV is about <b>1.88&nbsp;m</b> wide. Seen from the back of a 30-foot
+  room (<b>9.1&nbsp;m</b>) it subtends the same angle as a <b>125&nbsp;px</b>-wide
+  image seen from a normal 60&nbsp;cm desk distance. Shrinking the map is
+  optically identical to walking away from it, so these are honest previews —
+  look at them from where you normally sit, not up close.
+  Rule of thumb used for the type sizes: a capital letter needs roughly
+  15&nbsp;arcminutes to be read comfortably at a glance, which is about
+  40&nbsp;mm on that screen, or 3.7% of its height. The country labels are
+  deliberately under that: they are for you and the front of the room. What has
+  to survive the back row is the <b>yellow</b> and the <b>shapes</b>.
+</p>
+<div class="squint" id="squint"></div>
+
+<h2>What the generator did</h2>
+<p class="note">
+  Equal Earth projection centred on 145.5°E, Antarctica dropped, frame cropped
+  to 58°S–84°N. The central meridian is 145.5 rather than a round 145 so the
+  map's seam falls at 34.5°W, just east of Brazil's easternmost point — at
+  35°W the Brazilian nose was clipped off to the far edge of the map as a
+  stray speck. Greenland still straddles the seam and is drawn split, which is
+  what a Pacific-centred world map does; the build reports it rather than
+  quietly trimming a third of Greenland away.
+  Country fills are a 4-colouring computed from shared borders, so no two
+  neighbours ever share a fill; the four fills are spread on lightness because
+  hue is what a washed-out screen loses first. Highlights are drawn with no
+  border of their own and no admin-1 boundary appears anywhere, so a
+  highlighted state reads as a patch inside its country rather than as a new
+  country. Rebuild with <code>cd design/atlas &amp;&amp; npm install &amp;&amp; npm run build</code>;
+  edit <code>design/atlas/places.json</code> to change what is labelled or highlighted.
+</p>
+
+<script src="../atlas/atlas-projection.js"></script>
+<script>
+/* The four cities that actually have class records in classes/. Everything
+   else on the map is context; these are the ones a teacher can open. */
+const CLASS_CITIES = [
+  { city:"San Francisco", lat:37.749, lng:-122.499, classes:24 },
+  { city:"San Marcos",    lat:33.140, lng:-117.185, classes:6  },
+  { city:"Prague",        lat:50.076, lng: 14.435,  classes:2  },
+  { city:"Shenzhen",      lat:22.505, lng:113.921,  classes:36 },
+];
+
+/* The projection lives in ../atlas/atlas-projection.js, generated by the build
+   alongside the SVGs and checked against d3 every time. Never re-derive the
+   transform here — a second copy is a second thing to get wrong. */
+
+let variant = "pacific", pinsOn = true;   /* James's choice, 2026-09-02 */
+
+function setVariant(v){
+  variant = v;
+  document.getElementById("basemap").src = `../atlas/atlas-map-${v}.svg`;
+  for (const k of ["atlantic","pacific"]) {
+    document.getElementById("b-"+k).classList.toggle("on", k === v);
+  }
+  buildSquint();
+  drawPins();
+}
+function togglePins(){
+  pinsOn = !pinsOn;
+  document.getElementById("b-pins").classList.toggle("on", pinsOn);
+  drawPins();
+}
+
+function drawPins(){
+  const box = document.getElementById("pins");
+  const img = document.getElementById("basemap");
+  const k = img.clientWidth / AtlasMap.params[variant].viewBox[2];  /* viewBox units -> CSS px */
+  box.innerHTML = pinsOn ? CLASS_CITIES.map(c => {
+    const [x,y] = AtlasMap.project(c.lng, c.lat, variant);
+    return `<div class="pin" style="left:${(x*k).toFixed(1)}px;top:${(y*k).toFixed(1)}px">
+      <div class="hex">${c.classes}</div><span class="lbl">${c.city}</span></div>`;
+  }).join("") : "";
+}
+
+function buildSquint(){
+  /* 1.88 m of screen at 9.1 m is the same visual angle as 125 px at 0.6 m.
+     Mid-room is roughly half that distance, so double the width. */
+  const views = [
+    [125, "Back row · ~9 m (30 ft)"],
+    [250, "Middle of the room · ~4.5 m"],
+    [500, "Front tables · ~2.2 m"],
+  ];
+  document.getElementById("squint").innerHTML = views.map(([w,label]) =>
+    `<figure><img src="../atlas/atlas-map-${variant}.svg" width="${w}" alt="">
+     <figcaption>${label}<br>${w}px wide</figcaption></figure>`
+  ).join("");
+}
+
+document.getElementById("basemap").addEventListener("load", drawPins);
+window.addEventListener("resize", drawPins);
+buildSquint();
+drawPins();
+</script>
+</body></html>

@@ -1,0 +1,15 @@
+{
+  "name": "atlas-map-build",
+  "private": true,
+  "type": "module",
+  "description": "One-off generator for the Atlas world map SVG. Run: npm install && npm run build",
+  "scripts": {
+    "build": "node build-atlas-map.mjs"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.1",
+    "topojson-client": "^3.1.0",
+    "topojson-simplify": "^3.0.3",
+    "world-atlas": "^2.0.2"
+  }
+}

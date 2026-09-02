@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navigation Shell v3 · The Atlas → Class Page → Journal</title>
+<!--
+  ============================================================================
+  NAV SHELL v2 · vs.opushigh · Living Lessons front-of-house
+  Screens: The Atlas (map + timeline) -> Class Page (skill chart above fold,
+  Class Journal below with grey future entries) -> Hexagon Selector (big list).
+  Data: 68 real classes (2017-2025, 4 cities) injected from classes/ sample.
+  CHANGES (rollback tags):
+   [N1] Atlas: illustrated placeholder world map (blobby SVG, decorative);
+        pins are CITIES with count badges; flyout lists schools -> classes.
+   [N2] Timeline scrubber, year resolution 2017-2025 + All; filters pins,
+        flyouts, and class lists.
+   [N3] Class Page: skill chart ABOVE the fold (sample chart, NOT the final
+        chart design - that is a later round); journal + rest below.
+   [N4] Class Journal: completed entries oldest-first, then grey "not yet
+        planned" slots; default 16 sessions, +/- to adjust.
+   [N5] Grey entry click -> Hexagon Selector overlay: big list of the 13 real
+        hexagons; "Open in Stage Rail" is the handoff point to D18's screen.
+  V2 CHANGES:
+   [V2-1] Lit pins z-lifted above dim pins; hover raises further. (free)
+   [V2-2] Map zoom: 1x/1.8x/2.8x buttons + drag-to-pan; pins reproject on
+          zoom. Pure CSS width scaling — no perf cost.
+   [V2-3] Completed journal entries are clickable -> freeform entry screen
+          (blog-style, no required fields) + Living Studio composer preview
+          with the copyable transcription->journal prompt.
+   [V2-4] Hexagon Selector filters: GRADE (auto-set from the class) + SKILL
+          (parsed from badges). Two filters only, per James.
+  V3 CHANGES (this file):
+   [V3-1] The blobby placeholder world map is GONE. The Atlas now draws the
+          real generated base map, design/atlas/atlas-map-*.svg — Natural Earth
+          geometry on an Equal Earth projection, a 4-coloured political map with
+          the places SteamHead has taught highlighted in brand yellow. Built by
+          design/atlas/build-atlas-map.mjs; see design/atlas/places.json to
+          change what is labelled or highlighted.
+   [V3-2] proj() no longer fakes an equirectangular grid. Pins are placed by
+          the generated Equal Earth transform in design/atlas/atlas-projection.js,
+          which the build verifies against d3 on every run, so a pin cannot
+          drift away from the coastline it belongs to.
+   [V3-3] Ocean is now dark (#1E5C6B) and the land is light. That inversion is
+          what makes the yellow highlights and the pins carry to the back of a
+          30-foot classroom; see design/explorations/atlas-map-preview.html for
+          the legibility test behind it. Pins gained drop shadows to hold their
+          edges over the darker water.
+   [V3-4] Framing switch (Atlantic-centred / Pacific-centred) in the map
+          controls, while James picks one. Atlantic is the default: the
+          Pacific-centred framing crushes the six European cities into the
+          compressed left margin.
+  KNOWN ISSUE, inherited from v2 and now more visible: San Francisco and San
+  Marcos are 500 km apart, which is about 25 px on a world map, so their hex
+  pins overlap and the San Marcos count is hidden. Nudging is NOT the fix — the
+  displacement needed to separate two 54 px hexes would put the lower pin in
+  Mexico. The right fix is CLUSTERING: merge pins closer than ~70 px into one
+  pin with the combined count, whose flyout lists both cities, exactly as the
+  flyout already lists Sunset and Ulloa separately inside San Francisco. That
+  is a pin-behaviour change, not a map change, so it is left for its own round.
+  Country labels sitting behind a pin (Czechia behind Prague, S. Korea behind
+  Shenzhen) resolve themselves once pins cluster.
+  ============================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--yellow:#F1D302;--orange:#EDA83E;--teal:#5EB1BF;--acc-or:#EF7B44;--acc-bl:#409FCD;
+--dark:#474747;--ink:#2b2b2b;--gray:#D7D7D7;--light:#F4F4F4;--white:#fff;
+--heart:#EF7B44;--head:#409FCD;--hand:#F2B705;
+--disp:'Varela Round',system-ui,sans-serif;--body:'Montserrat',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--light);color:var(--ink);font-family:var(--body)}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:4px solid var(--acc-bl);outline-offset:2px}
+.screen{display:none;min-height:100vh}
+.screen.show{display:block}
+header{display:flex;align-items:center;gap:18px;padding:18px 32px}
+.title{font-family:var(--disp);font-size:30px}
+.title small{display:block;font-family:var(--body);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a8a}
+.back{border:0;background:var(--white);border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 2px 0 var(--gray)}
+
+/* ============ ATLAS ============ */
+#mapwrap{position:relative;margin:0 32px;background:#1E5C6B;border-radius:26px;overflow:hidden;box-shadow:0 3px 0 var(--gray)}
+/* [V3-5] The map is panned and zoomed with a transform on #mapinner, not by
+   scrolling. Pins sit OUTSIDE that layer in #pins so they keep a constant size
+   and stay crisp; their positions are recomputed from the view on every frame. */
+#mapview{position:relative;overflow:hidden;aspect-ratio:1920/867;cursor:grab}
+#mapview.grabbing{cursor:grabbing}
+#mapinner{position:absolute;inset:0;transform-origin:0 0;will-change:transform}
+#pins{position:absolute;inset:0;pointer-events:none}
+#pins .pin{pointer-events:auto}
+.zoomctl{position:absolute;top:16px;left:16px;z-index:30;display:flex;gap:6px}
+.zoomctl button{border:0;background:var(--white);border-radius:10px;padding:8px 13px;font-weight:800;box-shadow:0 2px 0 var(--gray)}
+.zoomctl button.on{background:var(--yellow)}
+/* Only offered once there is something to come back from. */
+.zoomctl{opacity:0;pointer-events:none;transition:opacity .2s}
+#mapwrap.zoomed .zoomctl{opacity:1;pointer-events:auto}
+#mapwrap img.basemap{display:block;width:100%;height:auto}
+.pin{position:absolute;transform:translate(-50%,-100%);border:0;background:none;text-align:center;z-index:3}
+.pin.dim{z-index:1}
+.pin:hover,.pin:focus-visible{z-index:20}
+.pin .hex{width:54px;height:60px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+ background:var(--yellow);display:grid;place-items:center;font-family:var(--disp);font-size:20px;margin:0 auto;transition:transform .15s;
+ filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
+.pin:hover .hex{transform:scale(1.15)}
+.pin.dim .hex{background:#cfcfc6;color:#8a8a8a}
+/* A group pin is stacked-looking, so "click me to open up" reads before you
+   have read the label. */
+.pin.group .hex{box-shadow:6px -6px 0 -1px rgba(255,255,255,.85),10px -10px 0 -2px rgba(255,255,255,.5)}
+.pin.group .lbl{background:var(--yellow)}
+.pin .lbl{font-weight:800;font-size:13px;background:var(--white);border-radius:999px;padding:2px 10px;box-shadow:0 2px 6px rgba(0,0,0,.35);margin-top:4px;display:inline-block;white-space:nowrap}
+.timeline{display:flex;justify-content:center;gap:8px;padding:22px 32px}
+.timeline button{border:0;background:var(--white);border-radius:12px;padding:10px 16px;font-weight:800;font-size:16px;box-shadow:0 2px 0 var(--gray)}
+.timeline button.on{background:var(--yellow);box-shadow:0 2px 0 #c9b100}
+.flyout{position:absolute;top:20px;right:20px;width:340px;max-height:calc(100% - 40px);overflow:auto;background:var(--white);border-radius:18px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:18px 20px;display:none}
+.flyout.open{display:block}
+.flyout h3{font-family:var(--disp);font-size:22px}
+.flyout .cnt{color:#8a8a8a;font-weight:600;font-size:13px;margin-bottom:10px}
+.flyout h4{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#8a8a8a;margin:12px 0 6px}
+/* [V3-6] Two targets per row: the name opens the class, the school year
+   filters the list to that year. The year is a real button with its own hover
+   state so the split is visible before anyone clicks it. */
+.flyout .cls{display:flex;align-items:stretch;gap:6px;margin-bottom:6px}
+.flyout .clsname{flex:1;text-align:left;border:0;background:var(--light);border-radius:10px;
+ padding:9px 12px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.flyout .clsname:hover{background:var(--yellow)}
+.flyout .yr{border:0;background:#ececec;border-radius:10px;padding:9px 10px;font-family:inherit;
+ font-weight:800;font-size:12.5px;color:#7a7a7a;cursor:pointer;white-space:nowrap}
+.flyout .yr:hover{background:var(--acc-bl);color:#fff}
+.flyout .yearpill{width:100%;border:0;border-radius:10px;padding:9px 12px;margin-bottom:10px;
+ font-family:inherit;font-weight:800;font-size:13px;background:var(--yellow);cursor:pointer;
+ box-shadow:0 2px 0 #c9b100}
+.flyout .hint{font-size:12px;font-weight:600;color:#8a8a8a;background:var(--light);
+ border-radius:8px;padding:7px 10px;margin-bottom:10px;line-height:1.45}
+.flyout .cityhead{color:var(--ink);font-size:14px;letter-spacing:0;text-transform:none;
+ font-family:var(--disp);margin:14px 0 2px}
+
+/* ============ CLASS PAGE ============ */
+.fold{min-height:calc(100vh - 96px);display:flex;flex-direction:column;padding:0 32px 10px}
+.chartcard{flex:1;background:var(--white);border-radius:24px;box-shadow:0 3px 0 var(--gray);padding:26px 34px}
+.chartcard .note{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b0a100;background:#fdf6c8;display:inline-block;padding:4px 12px;border-radius:999px;margin-bottom:14px}
+.domains{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
+.dom h3{font-family:var(--disp);font-size:22px;padding-bottom:8px;border-bottom:4px solid}
+.dom.heart h3{border-color:var(--heart)}.dom.head h3{border-color:var(--head)}.dom.hand h3{border-color:var(--hand)}
+.badge{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid #eee}
+.badge .hx{width:40px;height:45px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:grid;place-items:center;font-family:var(--disp);font-size:15px;color:var(--ink);flex:none}
+.dom.heart .hx{background:var(--heart)}.dom.head .hx{background:var(--head)}.dom.hand .hx{background:var(--hand)}
+.badge.zero .hx{background:#e7e7e0;color:#aaa}
+.badge b{font-size:15px;display:block}
+.badge .pips{display:flex;gap:3px;margin-top:3px}
+.badge .pips i{width:10px;height:10px;border-radius:50%;background:#e2e2da}
+.badge .pips i.on{background:var(--dark)}
+.badge .xp{margin-left:auto;font-weight:800;font-size:13px;color:#8a8a8a;white-space:nowrap}
+.scrollhint{text-align:center;color:#8a8a8a;font-weight:700;padding:12px 0 4px}
+
+/* journal */
+.journal{padding:26px 32px 60px;max-width:1150px;margin:0 auto}
+.journal h2{font-family:var(--disp);font-size:30px;margin-bottom:4px}
+.journal .sub{color:#8a8a8a;font-weight:600;margin-bottom:18px}
+.entry{background:var(--white);border-radius:18px;box-shadow:0 3px 0 var(--gray);padding:18px 24px;margin-bottom:14px;display:flex;gap:18px;align-items:center}
+.entry .num{font-family:var(--disp);font-size:22px;background:var(--yellow);width:52px;height:52px;border-radius:14px;display:grid;place-items:center;flex:none}
+.entry .body{flex:1}
+.entry h3{font-family:var(--disp);font-size:20px}
+.entry .meta{color:#8a8a8a;font-weight:600;font-size:13px}
+.entry p{font-size:15px;margin-top:4px}
+.entry .ph{width:84px;height:64px;border-radius:10px;background:repeating-linear-gradient(45deg,#e9e9e2,#e9e9e2 8px,#f4f4ee 8px,#f4f4ee 16px);border:2px dashed #c7c7bd;flex:none;display:grid;place-items:center;font-size:10px;color:#9a9a90;text-align:center}
+.entry.future{background:#ecece4;box-shadow:0 3px 0 #d8d8cd;border:2px dashed #c9c9bd;cursor:pointer}
+.entry.future .num{background:#d8d8cd;color:#8a8a80}
+.entry.future h3{color:#8a8a80}
+.entry.future:hover{background:#e4e4d8}
+.sessionctl{display:flex;align-items:center;gap:12px;justify-content:center;padding:8px 0 0;color:#8a8a8a;font-weight:700}
+.sessionctl button{border:0;background:var(--white);border-radius:10px;width:38px;height:38px;font-size:20px;font-weight:800;box-shadow:0 2px 0 var(--gray)}
+
+/* journal entry screen */
+.entrybody{background:var(--white);border-radius:20px;box-shadow:0 3px 0 var(--gray);padding:30px 36px;margin-bottom:22px}
+.entrybody h2{font-family:var(--disp);font-size:30px}
+.entrybody .meta{color:#8a8a8a;font-weight:700;margin:4px 0 16px}
+.entrybody .hexchip{display:inline-block;background:var(--yellow);font-weight:800;font-size:13px;border-radius:999px;padding:4px 14px;margin-left:10px;vertical-align:middle}
+.entrybody p{font-size:17px;line-height:1.65;margin-bottom:14px;max-width:70ch}
+.mediarow{display:flex;gap:14px;margin:16px 0}
+.mediarow .ph{width:220px;height:150px;border-radius:14px;background:repeating-linear-gradient(45deg,#e9e9e2,#e9e9e2 12px,#f4f4ee 12px,#f4f4ee 24px);border:3px dashed #c7c7bd;display:grid;place-items:center;color:#9a9a90;font-size:12px;text-align:center}
+.composer{background:#eef3f4;border:3px dashed #b9d3d8;border-radius:20px;padding:24px 30px}
+.composer h3{font-family:var(--disp);font-size:20px;margin-bottom:6px}
+.composer .chint{font-size:14.5px;color:#5a6f74;line-height:1.5;margin-bottom:12px;max-width:80ch}
+.composer textarea{width:100%;border:0;border-radius:12px;padding:14px 16px;font-family:ui-monospace,monospace;font-size:13px;line-height:1.55;color:#333;resize:vertical}
+.copybtn{margin-top:10px;border:0;background:var(--teal);color:#fff;border-radius:10px;padding:10px 18px;font-weight:800}
+
+/* selector overlay */
+.ovl{position:fixed;inset:0;background:rgba(43,43,43,.55);display:none;place-items:center;z-index:60}
+.ovl.open{display:grid}
+.panel{background:var(--light);border-radius:24px;width:min(1100px,94vw);max-height:88vh;overflow:auto;padding:26px 32px}
+.panel h2{font-family:var(--disp);font-size:28px}
+.panel .sub{color:#777;font-weight:600;margin:4px 0 16px}
+.hexrow{display:flex;align-items:center;gap:16px;width:100%;text-align:left;border:0;background:var(--white);border-radius:16px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 0 var(--gray)}
+.hexrow:hover{box-shadow:0 3px 0 var(--dark)}
+.hexrow .hx{width:44px;height:50px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--yellow);flex:none;display:grid;place-items:center;font-family:var(--disp);font-size:12px}
+.hexrow b{font-family:var(--disp);font-size:18px;display:block}
+.hexrow .bmeta{font-size:13px;color:#8a8a8a;font-weight:600}
+.hexrow .launch{margin-left:auto;background:var(--teal);color:#fff;border-radius:10px;padding:9px 14px;font-weight:800;font-size:13px;white-space:nowrap}
+</style></head><body>
+
+<!-- ============ SCREEN 1: THE ATLAS ============ -->
+<section class="screen show" id="scr-atlas">
+  <header>
+    <div class="title">The Atlas<small>SteamHead Living Lessons · pick a class</small></div>
+  </header>
+  <div id="mapwrap">
+  <!-- [V3-5] The manual zoom ladder is gone; pins do the zooming. This one
+       control is a way BACK, which a teacher driving from the front of the
+       room needs, and it only appears once the map has moved. -->
+  <div class="zoomctl"><button onclick="resetMap()" id="z-reset">↺ Whole world</button></div>
+ <div id="mapview">
+    <div id="mapinner">
+      <img class="basemap" id="basemap" src="../atlas/atlas-map-pacific.svg"
+           alt="World map. Countries where SteamHead has taught are filled in yellow; pins mark the cities with classes.">
+    </div>
+    <!-- #pins is a SIBLING of #mapinner, never a child: #mapinner carries the
+         zoom transform, and a pin inside it would be scaled 6x along with the
+         coastlines. Pin positions are computed from the view instead. -->
+    <div id="pins"></div>
+  </div>
+    <div class="flyout" id="flyout"></div>
+  </div>
+  <div class="timeline" id="timeline"></div>
+</section>
+
+<!-- ============ SCREEN 2: CLASS PAGE ============ -->
+<section class="screen" id="scr-class">
+  <header>
+    <button class="back" onclick="showScreen('scr-atlas')">← Atlas</button>
+    <div class="title" id="cp-title">Class<small id="cp-sub">school · year</small></div>
+  </header>
+  <div class="fold">
+    <div class="chartcard">
+      <span class="note">Sample skill chart — the real chart design is its own future round</span>
+      <div class="domains" id="chart"></div>
+    </div>
+    <div class="scrollhint">▼ scroll · Class Journal below</div>
+  </div>
+  <div class="journal">
+    <h2>Class Journal</h2>
+    <div class="sub">Oldest first. Grey entries are sessions not yet planned — click one to choose a hexagon.</div>
+    <div id="entries"></div>
+    <div class="sessionctl">
+      <button onclick="sessions=Math.max(doneCount,sessions-1);drawJournal()">−</button>
+      <span id="sesslabel"></span>
+      <button onclick="sessions=Math.min(40,sessions+1);drawJournal()">+</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN 3: JOURNAL ENTRY ============ -->
+<section class="screen" id="scr-entry">
+  <header>
+    <button class="back" onclick="showScreen('scr-class')">← Class Page</button>
+    <div class="title" id="en-title">Entry<small id="en-sub"></small></div>
+  </header>
+  <div class="journal" style="padding-top:6px">
+    <div class="entrybody" id="en-body"></div>
+    <div class="composer">
+      <h3>Teacher input · Living Studio preview</h3>
+      <p class="chint">Journal entries are freeform — write anything, paste anything, drop photos in.
+      Most teachers will record a voice note, transcribe it with an LLM, and paste the result here.
+      Use this prompt with your transcription for consistent, readable entries:</p>
+      <textarea readonly id="prompttext" rows="9"></textarea>
+      <button class="copybtn" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('prompttext').value);this.textContent='Copied!'">Copy prompt</button>
+    </div>
+  </div>
+</section>
+
+<!-- selector overlay -->
+<div class="ovl" id="ovl" role="dialog" aria-modal="true"><div class="panel">
+  <h2>Choose a hexagon for <span id="sel-session"></span></h2>
+  <div class="sub">Grade is pre-filtered to this class — change it if you're borrowing across grades.</div>
+  <div style="display:flex;gap:12px;margin-bottom:14px">
+    <select id="f-grade" onchange="drawHexList()" style="font-family:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 14px;box-shadow:0 2px 0 var(--gray)"></select>
+    <select id="f-skill" onchange="drawHexList()" style="font-family:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 14px;box-shadow:0 2px 0 var(--gray)"></select>
+  </div>
+  <div id="hexlist"></div>
+</div></div>
+
+<script src="../atlas/atlas-projection.js"></script>
+<script>
+const CLASSES = [{"id": "sunset-gk-2024", "name": "Kinder Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2024, "grade": "K", "status": "archived"}, {"id": "sunset-g1-2024", "name": "Grade 1 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2024, "grade": "1", "status": "archived"}, {"id": "sunset-g2-2024", "name": "Grade 2 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2024, "grade": "2", "status": "archived"}, {"id": "sunset-g3-2024", "name": "Grade 3 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2024, "grade": "3", "status": "archived"}, {"id": "sunset-g4-2024", "name": "Grade 4 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2024, "grade": "4", "status": "archived"}, {"id": "sunset-g5-2024", "name": "Grade 5 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2024, "grade": "5", "status": "archived"}, {"id": "sunset-gk-2025", "name": "Kinder Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2025, "grade": "K", "status": "active"}, {"id": "sunset-g1-2025", "name": "Grade 1 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2025, "grade": "1", "status": "active"}, {"id": "sunset-g2-2025", "name": "Grade 2 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2025, "grade": "2", "status": "active"}, {"id": "sunset-g3-2025", "name": "Grade 3 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2025, "grade": "3", "status": "active"}, {"id": "sunset-g4-2025", "name": "Grade 4 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2025, "grade": "4", "status": "active"}, {"id": "sunset-g5-2025", "name": "Grade 5 Makers", "school": "Sunset Elementary", "city": "San Francisco", "country": "US", "lat": 37.749, "lng": -122.499, "year": 2025, "grade": "5", "status": "active"}, {"id": "ulloa-gk-2023", "name": "Kinder Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2023, "grade": "K", "status": "archived"}, {"id": "ulloa-g1-2023", "name": "Grade 1 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2023, "grade": "1", "status": "archived"}, {"id": "ulloa-g2-2023", "name": "Grade 2 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2023, "grade": "2", "status": "archived"}, {"id": "ulloa-g3-2023", "name": "Grade 3 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2023, "grade": "3", "status": "archived"}, {"id": "ulloa-g4-2023", "name": "Grade 4 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2023, "grade": "4", "status": "archived"}, {"id": "ulloa-g5-2023", "name": "Grade 5 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2023, "grade": "5", "status": "archived"}, {"id": "ulloa-gk-2024", "name": "Kinder Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2024, "grade": "K", "status": "archived"}, {"id": "ulloa-g1-2024", "name": "Grade 1 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2024, "grade": "1", "status": "archived"}, {"id": "ulloa-g2-2024", "name": "Grade 2 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2024, "grade": "2", "status": "archived"}, {"id": "ulloa-g3-2024", "name": "Grade 3 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2024, "grade": "3", "status": "archived"}, {"id": "ulloa-g4-2024", "name": "Grade 4 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2024, "grade": "4", "status": "archived"}, {"id": "ulloa-g5-2024", "name": "Grade 5 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2024, "grade": "5", "status": "archived"}, {"id": "ulloa-gk-2025", "name": "Kinder Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2025, "grade": "K", "status": "active"}, {"id": "ulloa-g1-2025", "name": "Grade 1 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2025, "grade": "1", "status": "active"}, {"id": "ulloa-g2-2025", "name": "Grade 2 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2025, "grade": "2", "status": "active"}, {"id": "ulloa-g3-2025", "name": "Grade 3 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2025, "grade": "3", "status": "active"}, {"id": "ulloa-g4-2025", "name": "Grade 4 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2025, "grade": "4", "status": "active"}, {"id": "ulloa-g5-2025", "name": "Grade 5 Makers", "school": "Ulloa Elementary", "city": "San Francisco", "country": "US", "lat": 37.74, "lng": -122.5, "year": 2025, "grade": "5", "status": "active"}, {"id": "htms-g6-2020", "name": "Grade 6 Makers", "school": "High Tech Middle School", "city": "San Marcos", "country": "US", "lat": 33.14, "lng": -117.185, "year": 2020, "grade": "6", "status": "archived"}, {"id": "htms-g7-2020", "name": "Grade 7 Makers", "school": "High Tech Middle School", "city": "San Marcos", "country": "US", "lat": 33.14, "lng": -117.185, "year": 2020, "grade": "7", "status": "archived"}, {"id": "htms-g8-2020", "name": "Grade 8 Makers", "school": "High Tech Middle School", "city": "San Marcos", "country": "US", "lat": 33.14, "lng": -117.185, "year": 2020, "grade": "8", "status": "archived"}, {"id": "htms-g6-2021", "name": "Grade 6 Makers", "school": "High Tech Middle School", "city": "San Marcos", "country": "US", "lat": 33.14, "lng": -117.185, "year": 2021, "grade": "6", "status": "archived"}, {"id": "htms-g7-2021", "name": "Grade 7 Makers", "school": "High Tech Middle School", "city": "San Marcos", "country": "US", "lat": 33.14, "lng": -117.185, "year": 2021, "grade": "7", "status": "archived"}, {"id": "htms-g8-2021", "name": "Grade 8 Makers", "school": "High Tech Middle School", "city": "San Marcos", "country": "US", "lat": 33.14, "lng": -117.185, "year": 2021, "grade": "8", "status": "archived"}, {"id": "claudias-g4-2022", "name": "Grade 4 Makers", "school": "Claudia's School", "city": "Prague", "country": "CZ", "lat": 50.083, "lng": 14.43, "year": 2022, "grade": "4", "status": "archived"}, {"id": "keiths-g5-2022", "name": "Grade 5 Makers", "school": "Keith's School", "city": "Prague", "country": "CZ", "lat": 50.076, "lng": 14.44, "year": 2022, "grade": "5", "status": "archived"}, {"id": "isns-g6-2020", "name": "Grade 6 Makers", "school": "ISNS", "city": "Shenzhen", "country": "CN", "lat": 22.523, "lng": 113.93, "year": 2020, "grade": "6", "status": "archived"}, {"id": "isns-g7-2020", "name": "Grade 7 Makers", "school": "ISNS", "city": "Shenzhen", "country": "CN", "lat": 22.523, "lng": 113.93, "year": 2020, "grade": "7", "status": "archived"}, {"id": "isns-g8-2020", "name": "Grade 8 Makers", "school": "ISNS", "city": "Shenzhen", "country": "CN", "lat": 22.523, "lng": 113.93, "year": 2020, "grade": "8", "status": "archived"}, {"id": "sais-gk-2017", "name": "Kinder Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "K", "status": "archived"}, {"id": "sais-g1-2017", "name": "Grade 1 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "1", "status": "archived"}, {"id": "sais-g2-2017", "name": "Grade 2 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "2", "status": "archived"}, {"id": "sais-g3-2017", "name": "Grade 3 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "3", "status": "archived"}, {"id": "sais-g4-2017", "name": "Grade 4 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "4", "status": "archived"}, {"id": "sais-g5-2017", "name": "Grade 5 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "5", "status": "archived"}, {"id": "sais-g6-2017", "name": "Grade 6 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "6", "status": "archived"}, {"id": "sais-g7-2017", "name": "Grade 7 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "7", "status": "archived"}, {"id": "sais-g8-2017", "name": "Grade 8 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2017, "grade": "8", "status": "archived"}, {"id": "sais-gk-2018", "name": "Kinder Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "K", "status": "archived"}, {"id": "sais-g1-2018", "name": "Grade 1 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "1", "status": "archived"}, {"id": "sais-g2-2018", "name": "Grade 2 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "2", "status": "archived"}, {"id": "sais-g3-2018", "name": "Grade 3 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "3", "status": "archived"}, {"id": "sais-g4-2018", "name": "Grade 4 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "4", "status": "archived"}, {"id": "sais-g5-2018", "name": "Grade 5 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "5", "status": "archived"}, {"id": "sais-g6-2018", "name": "Grade 6 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "6", "status": "archived"}, {"id": "sais-g7-2018", "name": "Grade 7 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "7", "status": "archived"}, {"id": "sais-g8-2018", "name": "Grade 8 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2018, "grade": "8", "status": "archived"}, {"id": "sais-gk-2019", "name": "Kinder Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "K", "status": "archived"}, {"id": "sais-g1-2019", "name": "Grade 1 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "1", "status": "archived"}, {"id": "sais-g2-2019", "name": "Grade 2 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "2", "status": "archived"}, {"id": "sais-g3-2019", "name": "Grade 3 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "3", "status": "archived"}, {"id": "sais-g4-2019", "name": "Grade 4 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "4", "status": "archived"}, {"id": "sais-g5-2019", "name": "Grade 5 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "5", "status": "archived"}, {"id": "sais-g6-2019", "name": "Grade 6 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "6", "status": "archived"}, {"id": "sais-g7-2019", "name": "Grade 7 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "7", "status": "archived"}, {"id": "sais-g8-2019", "name": "Grade 8 Makers", "school": "SAIS", "city": "Shenzhen", "country": "CN", "lat": 22.487, "lng": 113.912, "year": 2019, "grade": "8", "status": "archived"}];
+const HEXES = [
+ {id:"hex-simple-circuits",t:"Simple Circuits — Figure It Out",b:"Craft Circuits L1",g:"K–5",gr:["K","1","2","3","4","5"],time:"15–20 min"},
+ {id:"hex-copper-tape-circuit",t:"Copper Tape Circuit",b:"Craft Circuits L2",g:"2–5",gr:["2","3","4","5"],time:"25–30 min"},
+ {id:"hex-space-wearables",t:"Space Wearables — Pack for Zero Gravity",b:"Card Craft L1 · Brainstorm L1",g:"K–2",gr:["K","1","2"],time:"20–25 min"},
+ {id:"hex-space-station-modules",t:"Space Station Modules",b:"Craft Circuits L1 · Card Craft L2",g:"K–2",gr:["K","1","2"],time:"2 sessions"},
+ {id:"hex-paper-tower",t:"Paper Tower Challenge",b:"Card Craft L1 · Setup & Cleanup L1",g:"1–5",gr:["1","2","3","4","5"],time:"15 min"},
+ {id:"hex-paper-tower-2",t:"Paper Tower 2 — Carrying Over",b:"Card Craft L1 · Sketching L1",g:"1–5",gr:["1","2","3","4","5"],time:"20 min"},
+ {id:"hex-paper-headwear",t:"Paper Headwear Challenge",b:"Card Craft L2 · Sketching L1",g:"1–5",gr:["1","2","3","4","5"],time:"25–30 min"},
+ {id:"hex-cardboard-cutter-license",t:"Cardboard Cutter License",b:"Learning Station L2 · Setup & Cleanup L2",g:"2–5",gr:["2","3","4","5"],time:"20 min"},
+ {id:"hex-hot-glue-license",t:"Hot Glue License",b:"Learning Station L2 · Setup & Cleanup L2",g:"2–5",gr:["2","3","4","5"],time:"20–25 min"},
+ {id:"hex-client-box",t:"Client Box — Prototype for a Real Client",b:"Card Craft L4 · User Stories L1",g:"3–5",gr:["3","4","5"],time:"2 sessions"},
+ {id:"hex-attachment-poster",t:"Attachment Methods Poster for 1st Graders",b:"Workshop L3 · Setup & Cleanup L3",g:"3–5",gr:["3","4","5"],time:"2 sessions"},
+ {id:"hex-makeymakey-inputs",t:"MakeyMakey Inputs",b:"Learning Station L3 · Craft Circuits L3",g:"4–5",gr:["4","5"],time:"40 min"},
+ {id:"hex-cardboard-controller",t:"Cardboard Game Controller",b:"Craft Circuits L4 · Card Craft L4",g:"4–5",gr:["4","5"],time:"2 sessions"},
+];
+const CHART_SAMPLE = {
+ heart:[["Learning Station",2,7],["Field Trip",1,2],["Interviews",0,0],["Digital Storytelling",1,1]],
+ head:[["Sketching",1,4],["Brainstorm",1,3],["Mind Map",0,0],["Driving Question",0,0]],
+ hand:[["Craft Circuits",3,6],["Card Craft",2,9],["Setup and Cleanup",2,11],["Beta Test",0,0]]
+};
+const YEARS=[2017,2018,2019,2020,2021,2022,2023,2024,2025];
+let yearSel="all", currentClass=null, sessions=16, doneCount=3, selSession=null;
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
+ document.getElementById(id).classList.add('show');window.scrollTo(0,0);}
+
+/* ---- Atlas ---------------------------------------------------------------
+   [V3-2] Equal Earth, from the generated module — never re-derive it here.
+   [V3-5] Click-to-zoom replaces the old 1x/2x/3x ladder.
+
+   Two clicks reach a class, always:
+     click 1  a pin that overlaps others  -> zoom to fit that group, so they
+                                             separate into individual pins
+              a pin standing on its own   -> zoom to it
+     click 2  any pin already separated    -> open the class list
+
+   Zoom is CAPPED AT MAX_ZOOM, and that cap is a property of the base map, not
+   a preference. James asked for the lone-pin zoom to frame "a 1 km x 1 km
+   area". A 1 km viewport cannot work here: the base map is Natural Earth 1:50m
+   simplified for projection, so its coastlines are straight lines below about
+   20 km, and its labels and city dots are baked into the SVG and therefore
+   scale with it. Past roughly 6x, "USA" fills the screen and every city dot
+   becomes an orange blob. Rendered at 4x, 8x, 20x and 60x, the map still reads
+   at 4-6x and is a flat field of colour by 20x. So the cap is 6x, which is
+   plenty to separate cities hundreds of kilometres apart (San Francisco and
+   San Marcos land 125 px apart at 5x).
+
+   Cities too close to EVER separate — Kailua-Kona, Holualoa and
+   Honaunau-Napoopoo are within 60 km of each other; Hackney is 8 km from
+   London — cannot be solved by zooming at any sane scale. Those groups zoom as
+   far as the cap allows and then open a combined list, grouped by city. That
+   fallback is why this is a group flyout rather than a city flyout.
+--------------------------------------------------------------------------- */
+const MAP_VARIANT = 'pacific';         /* James's framing choice, 2026-09-02 */
+const VB = AtlasMap.params[MAP_VARIANT].viewBox;
+const MAX_ZOOM = 6;                   /* see the note above — a base-map limit */
+const FOCUS_ZOOM = 4.5;               /* a lone pin: "we are going here" */
+const CLUSTER_PX = 68;                /* the hex is 54px wide; closer than this collides */
+const FIT_PAD = 110;                  /* keeps a fitted group clear of the frame */
+const EASE_MS = 420;
+
+let view = { k: 1, ox: 0, oy: 0 };
+/* Cities whose pin has already been pulled clear of its neighbours by a zoom.
+   Their next click opens the class list rather than zooming again — this is
+   what keeps the interaction at two clicks for grouped and lone pins alike. */
+let separated = new Set();
+let tween = null;
+
+function metrics(){
+  const el = document.getElementById('mapview');
+  return { W: el.clientWidth, H: el.clientHeight, s: el.clientWidth / VB[2] };
+}
+/* viewBox units -> screen px under a given view */
+function toScreen(lat, lng, v){
+  const { s } = metrics();
+  const [x, y] = AtlasMap.project(lng, lat, MAP_VARIANT);
+  return [v.ox + v.k * s * x, v.oy + v.k * s * y];
+}
+/* Never let the map be dragged so far that the world leaves the frame. */
+function clamp(v){
+  const { W, H, s } = metrics();
+  const mw = v.k * s * VB[2], mh = v.k * s * VB[3];
+  v.ox = mw <= W ? (W - mw) / 2 : Math.min(0, Math.max(W - mw, v.ox));
+  v.oy = mh <= H ? (H - mh) / 2 : Math.min(0, Math.max(H - mh, v.oy));
+  return v;
+}
+function viewCentredOn(x, y, k){
+  const { W, H, s } = metrics();
+  return clamp({ k, ox: W / 2 - k * s * x, oy: H / 2 - k * s * y });
+}
+/* The view that opens a group up: zoomed just far enough to pull its pins
+   apart, never so far that a member leaves the frame, never past the cap.
+   Zooming only as far as needed matters — every extra step magnifies the
+   labels and dots baked into the base map, so the restrained zoom is also the
+   legible one. */
+function viewForGroup(points){
+  const { W, H, s } = metrics();
+  const pts = points.map(p => AtlasMap.project(p.lng, p.lat, MAP_VARIANT));
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const spanX = Math.max(...xs) - Math.min(...xs), spanY = Math.max(...ys) - Math.min(...ys);
+
+  /* The largest zoom that still shows every member. */
+  const kFit = Math.min(
+    spanX > 0 ? (W - FIT_PAD * 2) / (s * spanX) : Infinity,
+    spanY > 0 ? (H - FIT_PAD * 2) / (s * spanY) : Infinity
+  );
+  /* The smallest zoom that pulls the closest pair a comfortable gap apart. */
+  let closest = Infinity;
+  for (let i = 0; i < pts.length; i++)
+    for (let j = i + 1; j < pts.length; j++)
+      closest = Math.min(closest, Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]));
+  const kSplit = closest > 0 && closest < Infinity
+    ? (CLUSTER_PX * 1.6) / (s * closest) : 1;
+
+  const k = Math.max(1, Math.min(kSplit, kFit, MAX_ZOOM));
+  const target = viewCentredOn((Math.min(...xs) + Math.max(...xs)) / 2,
+                               (Math.min(...ys) + Math.max(...ys)) / 2, k);
+  /* Ask the real question — will they actually be apart once we get there? —
+     rather than inferring it from whether the cap was hit. Kailua-Kona and
+     Holualoa stay on top of each other at any zoom this base map supports, and
+     those are the groups that need a list instead. */
+  const stillTogether = closest * s * k < CLUSTER_PX;
+  return { view: target, stillTogether };
+}
+function render(){
+  const inner = document.getElementById('mapinner');
+  inner.style.transform = `translate(${view.ox}px,${view.oy}px) scale(${view.k})`;
+  document.getElementById('mapwrap').classList.toggle('zoomed', view.k > 1.01);
+  drawPins();
+}
+/* Tweened by hand rather than by a CSS transition: the pins live outside the
+   transformed layer so they stay crisp and a constant size, which means their
+   positions have to be recomputed on every frame of the movement. */
+function glideTo(target, then){
+  if (tween) cancelAnimationFrame(tween);
+  const from = { ...view }, t0 = performance.now();
+  (function step(now){
+    const p = Math.min(1, (now - t0) / EASE_MS);
+    const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;  /* ease-in-out cubic */
+    view = { k: from.k + (target.k - from.k) * e,
+             ox: from.ox + (target.ox - from.ox) * e,
+             oy: from.oy + (target.oy - from.oy) * e };
+    render();
+    if (p < 1) tween = requestAnimationFrame(step);
+    else { tween = null; if (then) then(); }
+  })(t0);
+}
+function resetMap(){
+  separated = new Set();
+  closeFlyout();
+  glideTo(clamp({ k: 1, ox: 0, oy: 0 }));
+}
+
+/* ---- pins ---- */
+function cities(){
+  const m = {};
+  CLASSES.forEach(c => {
+    const e = m[c.city] = m[c.city] || { city: c.city, lat: c.lat, lng: c.lng, classes: [] };
+    e.lat = c.lat; e.lng = c.lng;
+    if (yearSel === "all" || c.year === yearSel) e.classes.push(c);
+  });
+  return Object.values(m);
+}
+/* Single-linkage grouping on SCREEN distance, so groups dissolve as you zoom
+   in — which is the whole point: the same click that zooms also splits the
+   group it was pointing at. */
+function groupPins(){
+  const list = cities().map(c => ({ ...c, xy: toScreen(c.lat, c.lng, view) }));
+  const groups = [];
+  for (const c of list){
+    const hit = groups.find(g => g.members.some(m =>
+      Math.hypot(m.xy[0] - c.xy[0], m.xy[1] - c.xy[1]) < CLUSTER_PX));
+    if (hit) hit.members.push(c); else groups.push({ members: [c] });
+  }
+  for (const g of groups){
+    g.xy = [ g.members.reduce((n, m) => n + m.xy[0], 0) / g.members.length,
+             g.members.reduce((n, m) => n + m.xy[1], 0) / g.members.length ];
+    g.classes = g.members.flatMap(m => m.classes);
+    g.active = g.classes.length > 0;
+    g.key = g.members.map(m => m.city).sort().join('|');
+  }
+  return groups;
+}
+function drawPins(){
+  const box = document.getElementById('pins');
+  const { W, H } = metrics();
+  box.innerHTML = '';
+  for (const g of groupPins()){
+    const [x, y] = g.xy;
+    if (x < -80 || x > W + 80 || y < -60 || y > H + 90) continue;   /* off-frame */
+    const many = g.members.length > 1;
+    const b = document.createElement('button');
+    b.className = 'pin' + (g.active ? '' : ' dim') + (many ? ' group' : '');
+    b.style.left = x + 'px';
+    b.style.top = y + 'px';
+    const label = many ? `${g.members.length} places` : g.members[0].city;
+    b.innerHTML = `<div class="hex">${g.active ? g.classes.length : '·'}</div>` +
+                  `<span class="lbl">${label}</span>`;
+    b.setAttribute('aria-label', g.active
+      ? `${label}, ${g.classes.length} classes` + (many ? ' — zoom in' : '')
+      : `${label}, no classes in this year`);
+    b.onclick = () => pinClicked(g);
+    box.appendChild(b);
+  }
+}
+/* The two-click rule lives here and nowhere else. */
+function pinClicked(g){
+  if (!g.active){ closeFlyout(); return; }
+
+  if (g.members.length > 1){
+    const { view: target, stillTogether } = viewForGroup(g.members);
+    const wanted = new Set(g.members.map(m => m.city));
+    g.members.forEach(m => separated.add(m.city));
+    /* Only a group that will STILL be overlapping when we arrive gets the list
+       — see the Kona / Hackney note at the top of this block. And the list is
+       rebuilt from the groups as they stand AFTER the move, so it covers just
+       the cities that are genuinely still stacked: clicking a group of four
+       where three stay stacked lists those three, not the one that came free
+       and is now sitting there as its own pin. */
+    glideTo(target, stillTogether ? () => {
+      const remaining = groupPins().find(x => x.members.length > 1 && x.members.some(m => wanted.has(m.city)));
+      if (remaining) openFlyout(remaining);
+    } : null);
+    return;
+  }
+
+  const city = g.members[0].city;
+  if (separated.has(city)){ openFlyout(g); return; }
+  separated.add(city);
+  const [vx, vy] = AtlasMap.project(g.members[0].lng, g.members[0].lat, MAP_VARIANT);
+  glideTo(viewCentredOn(vx, vy, FOCUS_ZOOM));
+}
+
+/* ---- class selection ---- */
+/* [V3-6] School-year filtering with no filter menu. Every class row already
+   carries its school year, so the year itself IS the control: click "2018-19"
+   on any row and the list narrows to that year. Nothing new appears on screen
+   until you use it, which is what James asked for — Shenzhen and San
+   Francisco carry 30+ classes each and the rest carry two or three, so a
+   permanent filter bar would be clutter almost everywhere it appeared. */
+const LONG_LIST = 12;                  /* past this, offer the hint */
+let flyoutGroup = null, yearFilter = null;
+
+const schoolYear = c => `${c.year}-${String(c.year + 1).slice(2)}`;
+const closeFlyout = () => {
+  flyoutGroup = null; yearFilter = null;
+  document.getElementById('flyout').classList.remove('open');
+};
+function filterYear(y){ yearFilter = y; renderFlyout(); }
+function clearYearFilter(){ yearFilter = null; renderFlyout(); }
+
+function openFlyout(g){ flyoutGroup = g; yearFilter = null; renderFlyout(); }
+
+function renderFlyout(){
+  const g = flyoutGroup;
+  if (!g) return;
+  const f = document.getElementById('flyout');
+  const all = g.classes;
+  const shown = yearFilter ? all.filter(c => schoolYear(c) === yearFilter) : all;
+  const years = [...new Set(all.map(schoolYear))].sort();
+  const title = g.members.length > 1 ? `${g.members.length} places` : g.members[0].city;
+
+  /* Grouped by city first when the flyout covers a whole cluster, then by
+     school — otherwise two Prague schools would read as one list. */
+  const byCity = {};
+  shown.forEach(c => (byCity[c.city] = byCity[c.city] || []).push(c));
+
+  let html = `<h3>${title}</h3><div class="cnt">${shown.length} of ${all.length} class(es)` +
+             `${years.length > 1 ? ` · ${years.length} school years` : ''}</div>`;
+  if (yearFilter){
+    html += `<button class="yearpill on" onclick="clearYearFilter()">${yearFilter} ✕ show all years</button>`;
+  } else if (all.length > LONG_LIST){
+    html += `<div class="hint">Long list — click any year to show only that year.</div>`;
+  }
+
+  for (const [city, list] of Object.entries(byCity)){
+    if (g.members.length > 1) html += `<h4 class="cityhead">${city}</h4>`;
+    const schools = {};
+    list.forEach(c => (schools[c.school] = schools[c.school] || []).push(c));
+    for (const [school, cl] of Object.entries(schools)){
+      html += `<h4>${school}</h4>`;
+      html += cl.sort((a, b) => a.year - b.year || ('' + a.grade).localeCompare('' + b.grade))
+        /* While a year filter is on, every row would repeat the same year and
+           the pill above already says which — so the badge steps aside and the
+           name gets the full width. */
+        .map(c => `<div class="cls"><button class="clsname" onclick='openClass(${JSON.stringify(c)})'>${c.name}</button>` +
+                  (yearFilter ? '' :
+                   `<button class="yr" onclick="filterYear('${schoolYear(c)}')" ` +
+                   `title="Show only ${schoolYear(c)}" aria-label="Show only ${schoolYear(c)}">${schoolYear(c)}</button>`) +
+                  `</div>`)
+        .join('');
+    }
+  }
+  f.innerHTML = html;
+  f.classList.add('open');
+}
+
+function drawTimeline(){
+  document.getElementById('timeline').innerHTML =
+    [`<button class="${yearSel === 'all' ? 'on' : ''}" onclick="yearSel='all';refreshAtlas()">All years</button>`,
+     ...YEARS.map(y => `<button class="${yearSel === y ? 'on' : ''}" onclick="yearSel=${y};refreshAtlas()">${y}</button>`)].join('');
+}
+function refreshAtlas(){ drawTimeline(); closeFlyout(); render(); }
+
+/* ---- Class Page ---- */
+function openClass(c){currentClass=c;sessions=16;
+ document.getElementById('cp-title').childNodes[0].nodeValue=c.name+" ";
+ document.getElementById('cp-sub').textContent=`${c.school} · ${c.city} · ${c.year}-${String(c.year+1).slice(2)} · grade ${c.grade}`;
+ drawChart();drawJournal();showScreen('scr-class');}
+function drawChart(){
+ const dom=(k,label)=>`<div class="dom ${k}"><h3>${label}</h3>`+CHART_SAMPLE[k].map(([n,d,x])=>
+  `<div class="badge ${d===0?'zero':''}"><div class="hx">${d>0?'L'+d:'–'}</div>
+   <div><b>${n}</b><div class="pips">${[1,2,3,4,5].map(i=>`<i class="${i<=d?'on':''}"></i>`).join('')}</div></div>
+   <span class="xp">${x>0?'×'+x:''}</span></div>`).join('')+`</div>`;
+ document.getElementById('chart').innerHTML=dom('heart','Heart')+dom('head','Head')+dom('hand','Hand');}
+const DONE=[
+ {t:"Paper Tower Challenge",d:"Sep 12",p:"First towers! The fold discovery spread table to table.",hex:"hex-paper-tower"},
+ {t:"Hot Glue License",d:"Sep 19",p:"Whole class licensed. Two burns, both boring — as designed.",hex:"hex-hot-glue-license"},
+ {t:"Simple Circuits — Figure It Out",d:"Sep 26",p:"Every table reached first light without instructions.",hex:"hex-simple-circuits"},
+];
+function drawJournal(){doneCount=DONE.length;
+ const e=document.getElementById('entries');let html='';
+ DONE.forEach((en,i)=>{html+=`<div class="entry" style="cursor:pointer" onclick="openEntry(${i})"><div class="num">${i+1}</div>
+  <div class="body"><h3>${en.t}</h3><div class="meta">${en.d} · completed</div><p>${en.p}</p></div>
+  <div class="ph">blurred<br>class photo</div></div>`;});
+ for(let i=doneCount;i<sessions;i++){
+  html+=`<div class="entry future" onclick="openSelector(${i+1})"><div class="num">${i+1}</div>
+   <div class="body"><h3>Session ${i+1} — not yet planned</h3><div class="meta">click to choose a hexagon</div></div></div>`;}
+ e.innerHTML=html;
+ document.getElementById('sesslabel').textContent=`${sessions} sessions this year`;}
+
+/* ---- journal entry ---- */
+const PROMPT=`Turn my rough voice transcription below into a short Class Journal entry for our elementary makerspace class.
+
+Rules:
+- 2 to 4 short paragraphs, under 200 words total, no headings or bullet lists.
+- Keep my voice: plain, warm, specific. Keep the funny or human moments.
+- Never use student names. Say "one maker," "a third grader," "one table."
+- Rough shape: what we did, what surprised us, where we're headed next.
+- Only mention badges or skills if I mentioned them.
+- Do not invent details that are not in my transcription.
+- If I mentioned a plan for next session, end with one line about it.
+
+Transcription:
+[PASTE TRANSCRIPTION HERE]`;
+function openEntry(i){const en=DONE[i];
+ document.getElementById('en-title').childNodes[0].nodeValue="Session "+(i+1)+" ";
+ document.getElementById('en-sub').textContent=currentClass?`${currentClass.name} · ${en.d}`:en.d;
+ document.getElementById('en-body').innerHTML=`<h2>${en.t}<span class="hexchip">hexagon</span></h2>
+  <div class="meta">${en.d} · written by the teacher</div>
+  <p>${en.p}</p>
+  <p>Sample of the freeform space: any paragraphs, photos, or video the teacher wants. No required fields, no forms to fill — an entry can be two sentences or a full story.</p>
+  <div class="mediarow"><div class="ph">blurred class photo</div><div class="ph">blurred class photo</div><div class="ph">video embed</div></div>`;
+ document.getElementById('prompttext').value=PROMPT;
+ showScreen('scr-entry');}
+
+/* ---- selector ---- */
+function skillsOf(h){return h.b.split('·').map(s=>s.trim().replace(/ L\d$/,''))}
+function openSelector(n){selSession=n;
+ document.getElementById('sel-session').textContent="Session "+n;
+ const gsel=document.getElementById('f-grade');
+ const grades=["All grades","K","1","2","3","4","5"];
+ gsel.innerHTML=grades.map(g=>`<option ${currentClass&&g===currentClass.grade?'selected':''}>${g}</option>`).join('');
+ const skills=[...new Set(HEXES.flatMap(skillsOf))].sort();
+ document.getElementById('f-skill').innerHTML=['All skills',...skills].map(s=>`<option>${s}</option>`).join('');
+ drawHexList();
+ document.getElementById('ovl').classList.add('open')}
+function drawHexList(){const n=selSession;
+ const g=document.getElementById('f-grade').value, sk=document.getElementById('f-skill').value;
+ const list=HEXES.filter(h=>(g==='All grades'||h.gr.includes(g))&&(sk==='All skills'||skillsOf(h).includes(sk)));
+ document.getElementById('hexlist').innerHTML=(list.length?list:[]).map(h=>
+  `<button class="hexrow" onclick="alert('Prototype handoff: Session ${n} → ${h.t}\\nThis would open the Stage Rail screen (D18) with this hexagon loaded.')">
+    <div class="hx">HEX</div><div><b>${h.t}</b><span class="bmeta">${h.b} · grades ${h.g} · ${h.time}</span></div>
+    <span class="launch">Open in Stage Rail →</span></button>`).join('');
+ document.getElementById('ovl').classList.add('open');}
+document.getElementById('ovl').onclick=e=>{if(e.target.id==='ovl')document.getElementById('ovl').classList.remove('open')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('ovl').classList.remove('open')});
+
+/* [V3-5] Drag to pan by moving the view, not the scrollbars. Pointer capture
+   means a drag that leaves the map still ends cleanly, and the 4px threshold
+   keeps a slightly shaky click on a pin from being swallowed as a pan. */
+(function(){
+  const v = document.getElementById('mapview');
+  let drag = null;
+  v.addEventListener('pointerdown', e => {
+    if (e.target.closest('.pin')) return;
+    drag = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy, moved: false };
+    v.setPointerCapture(e.pointerId);
+  });
+  v.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+    drag.moved = true; v.classList.add('grabbing');
+    view = clamp({ k: view.k, ox: drag.ox + dx, oy: drag.oy + dy });
+    render();
+  });
+  const stop = () => { drag = null; v.classList.remove('grabbing'); };
+  v.addEventListener('pointerup', stop);
+  v.addEventListener('pointercancel', stop);
+})();
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('scr-atlas').classList.contains('show')) resetMap();
+});
+window.addEventListener('resize',()=>{view=clamp(view);render();});
+/* The base map is ~380 KB; until it has laid out, #mapinner has no height and
+   the pins would all pile up at the top-left. Redraw on load. */
+document.getElementById('basemap').addEventListener('load',()=>{view=clamp(view);render();});
+refreshAtlas();
+</script></body></html>
