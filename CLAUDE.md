@@ -20,6 +20,8 @@ for SteamHead makerspace classes. **Current phase: IMPLEMENTATION.** Planning is
   review, glossary). Keep these current when workflows change.
 - `docs/` — project brief context: decisions log, project instructions, changelogs.
 - `design/` — design brief, brand tokens, and static HTML design explorations.
+  `design/atlas/` holds the generated Atlas base map: edit `places.json` and
+  re-run the build, never hand-edit the SVG. See `design/atlas/_README.md`.
 
 Private data (class records, student media, rosters) NEVER goes in this repo —
 it will live in Cloudflare D1/R2 behind auth. See `docs/decisions.md` D3–D6.
