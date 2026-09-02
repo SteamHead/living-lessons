@@ -16,8 +16,8 @@ throughout the room.
 | `build-atlas-map.mjs` | The generator. Reads the two data files below plus `places.json`, writes everything else here. |
 | `fetch-admin1-subset.mjs` | Run only when `places.json` gains a new province/state. Downloads Natural Earth admin-1 and trims it. |
 | `admin1-subset.geojson` | Committed output of the above — the 9 provinces we highlight. Keeps the build offline. |
-| `atlas-map-atlantic.svg` | The map, central meridian 10°W. **The default.** |
-| `atlas-map-pacific.svg` | The same map, central meridian 145°E. Kept while the framing is undecided. |
+| `atlas-map-pacific.svg` | The map, central meridian 145.5°E. **This is the one in use.** |
+| `atlas-map-atlantic.svg` | The same map, central meridian 10°W. Kept only for the comparison in the preview page. |
 | `atlas-projection.js` | Generated. The Equal Earth transform plus each variant's numbers, for placing pins. Load it and call `AtlasMap.project(lng, lat, variant)`. |
 | `atlas-projection.json` | The same numbers as data, for any non-browser consumer. |
 
@@ -74,12 +74,48 @@ Adding a new place:
   survives the back row is the yellow and the shapes. The squint test in
   `../explorations/atlas-map-preview.html` shows exactly what each row sees.
 
-## Framing: still to decide
+## Framing: Pacific-centred (decided 2026-09-02)
 
-`atlantic` (10°W) is the default and the recommendation. `pacific` (145°E) puts
-San Francisco and Shenzhen facing each other across one ocean, which tells the
-SteamHead story nicely — but it pushes London, Madrid, Lisbon, Prague, Brno and
-Istanbul into the compressed left margin where Equal Earth squeezes hardest,
-and leaves the middle of the map as empty Pacific. Flip between them in the
-preview page or in `nav-shell-v3`, then delete the loser and its `VARIANTS`
-entry in the generator.
+Central meridian **145.5°E**. San Francisco and Shenzhen face each other across
+one ocean, which is the SteamHead story. Three consequences, accepted knowingly:
+
+- The European cities sit in the left third of the map. Their labels are placed
+  out in open water with leader lines and do not collide, but Europe is busier
+  than it is on an Atlantic-centred map.
+- **No Atlantic ocean label.** In this framing the Atlantic is split across
+  both edges, and neither piece is wide enough for the type. The build says so
+  rather than shipping half a word.
+- **Greenland is drawn split**, most of it beside Canada and a wedge at the
+  opposite edge. That is what a Pacific-centred world map does. It is reported,
+  not fixed: trimming the small side would delete a third of Greenland, and the
+  general "drop the smaller piece" rule that would do it automatically was
+  tried and abandoned because it also deletes French Guiana and a quarter of
+  New Zealand. Only genuine artifacts go in `DROPPED_COUNTRIES`, by hand.
+
+Why 145.5 and not a round 145: a framing's seam is at `centralMeridian − 180`,
+and land *east* of the seam wraps to the far side of the map. At 145°E the seam
+lands at 35°W, which is 0.2° west of Brazil's easternmost point — so the
+Brazilian nose was being clipped off to the opposite edge as a 3-pixel speck.
+145.5°E puts the seam at 34.5°W, just clear of it.
+
+`atlantic` is still generated so the preview page can show the two side by
+side. If that comparison stops being useful, delete the variant's entry from
+`VARIANTS` in the generator and the file it produces.
+
+## Zooming: what this map can and cannot do
+
+The Atlas zooms when you click a pin (see `docs/decisions.md` D27), and the
+zoom is **capped at 6×**. That cap is a property of this map, so it belongs
+here:
+
+- Geometry is simplified for projection, so coastlines are straight lines below
+  roughly 20 km. Past ~10× the outline is visibly polygonal.
+- The country labels and city dots are **baked into the SVG** and therefore
+  scale with it. By 8× the word "USA" fills the screen; by 20× a city dot is a
+  blob covering its own state.
+
+Rendered at 4×, 8×, 20× and 60× to check: it reads at 4–6× and is a flat field
+of colour by 20×. So a request to "zoom to a 1 km area" cannot be satisfied by
+this base map, and the Atlas separates close pins by grouping and listing them
+instead. If deeper zoom is ever genuinely needed, the fix is a second SVG
+variant with the `labels` and `cities` layers omitted, swapped in while zoomed.

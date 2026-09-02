@@ -64,14 +64,19 @@ const SIMPLIFY = 8e-3;       /* spherical steradians; see the note above */
 const MIN_LAND_AREA = 6;     /* px² — below this a landmass is pixel noise */
 const MIN_HL_AREA = 90;      /* px² — below this, let the city dot speak instead */
 
-const ANTARCTICA = "010";
+/* Landmasses deliberately not drawn, each for a stated reason. This is the
+   only sanctioned way to remove real land from the map. */
+const DROPPED_COUNTRIES = {
+  "010": "Antarctica — nothing in SteamHead's history is down there, and the " +
+         "space it costs is enormous on an equal-area projection",
+};
 
 /* --------------------------------------------------------------- geometry */
 const topo = simplify(presimplify(read("./node_modules/world-atlas/countries-50m.json")), SIMPLIFY);
 const admin1 = read("./admin1-subset.geojson");
 const places = read("./places.json");
 
-const geoms = topo.objects.countries.geometries.filter((g) => g.id !== ANTARCTICA);
+const geoms = topo.objects.countries.geometries.filter((g) => !DROPPED_COUNTRIES[g.id]);
 const countryFeatures = feature(topo, { type: "GeometryCollection", geometries: geoms }).features;
 
 /* Map colouring from shared borders. topojson's neighbors() reads adjacency out
@@ -157,7 +162,13 @@ function subpaths(d) {
       const [x2, y2] = pts[(i + 1) % n];
       a += x1 * y2 - x2 * y1;
     }
-    return { d: "M" + chunk, area: pts.length < 3 ? 0 : Math.abs(a) / 2 };
+    const xs = pts.map((q) => q[0]);
+    return {
+      d: "M" + chunk,
+      area: pts.length < 3 ? 0 : Math.abs(a) / 2,
+      minX: xs.length ? Math.min(...xs) : Infinity,
+      maxX: xs.length ? Math.max(...xs) : -Infinity,
+    };
   });
 }
 const clean = (d, minArea) => subpaths(d).filter((s) => s.area >= minArea).map((s) => s.d).join("");
@@ -165,6 +176,29 @@ const totalArea = (d) => subpaths(d).reduce((n, s) => n + s.area, 0);
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const n1 = (v) => Number(v.toFixed(1));
+
+/* Every framing has a seam — the meridian opposite its centre — and a country
+   sitting on it is drawn cut in two, one piece against each side of the map.
+   That is correct cartography and it can still look like a bug, so the build
+   REPORTS what the current seam cuts instead of trying to clean it up.
+   Cleaning it up automatically was tried and abandoned: any "drop the smaller
+   piece" rule also deletes French Guiana (13% of France's drawn area) at this
+   seam, and a quarter of New Zealand at the Atlantic-centred one. A country
+   with territory on two continents is not an artifact. Only genuine artifacts
+   go in DROPPED_COUNTRIES, by hand, with a reason. */
+function reportSeamSplits(path, features, report) {
+  const THIRD = W / 3;
+  for (const f of features) {
+    const subs = subpaths(path(f) || "").filter((s) => s.area >= MIN_LAND_AREA);
+    if (subs.length < 2) continue;
+    const left = subs.filter((s) => s.maxX < THIRD);
+    const right = subs.filter((s) => s.minX > W - THIRD);
+    if (!left.length || !right.length) continue;
+    const sum = (list) => list.reduce((n, s) => n + s.area, 0);
+    const share = Math.min(sum(left), sum(right)) / sum(subs);
+    report.push(`${f.properties.name} is cut by this framing's seam (${Math.round(share * 100)}% on the far side)`);
+  }
+}
 
 /* --------------------------------------------------------- label layout */
 /* Type sizes, kept in one place because everything below measures against them. */
@@ -262,6 +296,10 @@ function buildMap({ centralMeridian }) {
 
   const path = geoPath(projection).digits(1);
   const inFrame = (p) => p && Number.isFinite(p[0]) && p[0] >= 0 && p[0] <= W && p[1] >= 0 && p[1] <= H;
+  /* Everything the build decided not to draw, or drew differently than asked,
+     collects here and is printed. A map that quietly loses a place is worse
+     than one that complains. */
+  const skipped = [];
 
   /* --- one definition per country --------------------------------------- */
   const defs = [];
@@ -274,12 +312,13 @@ function buildMap({ centralMeridian }) {
     drawn.set(String(f.id), { id, feature: f, colour: colourOf[i] });
   });
 
+  reportSeamSplits(path, countryFeatures, skipped);
+
   /* --- highlights ------------------------------------------------------- */
   const admin1ByKey = new Map(
     admin1.features.map((f) => [`${f.properties.iso_n3}|${f.properties.name}`, f])
   );
   const hl = { taught: [], planned: [] };
-  const skipped = [];
 
   for (const c of places.countries) {
     const bucket = hl[c.status === "planned" ? "planned" : "taught"];
@@ -502,8 +541,17 @@ function verifyPins(params) {
 }
 
 /* ------------------------------------------------------------------- main */
+/* Pacific-centred is the chosen framing (James, 2026-09-02): San Francisco and
+   Shenzhen face each other across one ocean, which is the SteamHead story.
+   Atlantic-centred is kept generated because the preview page compares the two
+   and the cost is one more file. */
 const VARIANTS = [
-  { name: "pacific", centralMeridian: 145 },
+  /* 145.5°E, not a round 145, puts the seam at 34.5°W. A seam is at
+     centralMeridian − 180, and land EAST of it wraps to the far side of the
+     map — so the seam has to sit east of Brazil's easternmost point (34.79°W),
+     not west of it, or the Brazilian nose is clipped off to the opposite edge
+     as a stray speck. */
+  { name: "pacific", centralMeridian: 145.5 },
   { name: "atlantic", centralMeridian: -10 },
 ];
 

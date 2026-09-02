@@ -8,8 +8,10 @@
   Not a screen design — a rig for judging design/atlas/atlas-map-*.svg before
   it goes into the Atlas. Three things to look at:
 
-   1. FRAMING. Pacific-centred (145°E) vs Atlantic-centred (10°W). Same data,
-      same code, one parameter apart. See design/atlas/build-atlas-map.mjs.
+   1. FRAMING. Pacific-centred (145.5°E) is the CHOSEN framing: San Francisco
+      and Shenzhen face each other across one ocean. Atlantic-centred (10°W) is
+      kept alongside for comparison — same data, same code, one parameter
+      apart. See design/atlas/build-atlas-map.mjs.
    2. THE SQUINT TEST. The panel at the bottom shrinks the map to the visual
       angle it will actually have from the middle and the back of a 30-foot
       classroom. If a label dies there, it dies on the TV.
@@ -71,14 +73,14 @@ p.note b{color:#2b2b2b}
 <h1>The Atlas base map<small>Preview · SteamHead Living Lessons</small></h1>
 
 <div class="controls">
-  <button id="b-atlantic" class="on" onclick="setVariant('atlantic')">Atlantic-centred (10°W)</button>
-  <button id="b-pacific" onclick="setVariant('pacific')">Pacific-centred (145°E)</button>
+  <button id="b-pacific" class="on" onclick="setVariant('pacific')">Pacific-centred (145.5°E) · chosen</button>
+  <button id="b-atlantic" onclick="setVariant('atlantic')">Atlantic-centred (10°W)</button>
   <span class="sep"></span>
   <button id="b-pins" class="on" onclick="togglePins()">Class pins</button>
 </div>
 
 <div id="stage">
-  <img id="basemap" src="../atlas/atlas-map-atlantic.svg"
+  <img id="basemap" src="../atlas/atlas-map-pacific.svg"
        alt="World map of everywhere SteamHead has taught">
   <div id="pins"></div>
 </div>
@@ -107,7 +109,13 @@ p.note b{color:#2b2b2b}
 
 <h2>What the generator did</h2>
 <p class="note">
-  Equal Earth projection, Antarctica dropped, frame cropped to 58°S–84°N.
+  Equal Earth projection centred on 145.5°E, Antarctica dropped, frame cropped
+  to 58°S–84°N. The central meridian is 145.5 rather than a round 145 so the
+  map's seam falls at 34.5°W, just east of Brazil's easternmost point — at
+  35°W the Brazilian nose was clipped off to the far edge of the map as a
+  stray speck. Greenland still straddles the seam and is drawn split, which is
+  what a Pacific-centred world map does; the build reports it rather than
+  quietly trimming a third of Greenland away.
   Country fills are a 4-colouring computed from shared borders, so no two
   neighbours ever share a fill; the four fills are spread on lightness because
   hue is what a washed-out screen loses first. Highlights are drawn with no
@@ -132,7 +140,7 @@ const CLASS_CITIES = [
    alongside the SVGs and checked against d3 every time. Never re-derive the
    transform here — a second copy is a second thing to get wrong. */
 
-let variant = "atlantic", pinsOn = true;
+let variant = "pacific", pinsOn = true;   /* James's choice, 2026-09-02 */
 
 function setVariant(v){
   variant = v;

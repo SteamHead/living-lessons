@@ -3,7 +3,7 @@
   var PARAMS = {
   "pacific": {
     "projection": "equalEarth",
-    "centralMeridian": 145,
+    "centralMeridian": 145.5,
     "scale": 345.81749468460134,
     "translate": [
       936,

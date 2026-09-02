@@ -79,13 +79,20 @@ header{display:flex;align-items:center;gap:18px;padding:18px 32px}
 
 /* ============ ATLAS ============ */
 #mapwrap{position:relative;margin:0 32px;background:#1E5C6B;border-radius:26px;overflow:hidden;box-shadow:0 3px 0 var(--gray)}
-#mapview{overflow:auto;cursor:grab;scrollbar-width:thin}
+/* [V3-5] The map is panned and zoomed with a transform on #mapinner, not by
+   scrolling. Pins sit OUTSIDE that layer in #pins so they keep a constant size
+   and stay crisp; their positions are recomputed from the view on every frame. */
+#mapview{position:relative;overflow:hidden;aspect-ratio:1920/867;cursor:grab}
 #mapview.grabbing{cursor:grabbing}
-#mapinner{position:relative;width:100%}
+#mapinner{position:absolute;inset:0;transform-origin:0 0;will-change:transform}
+#pins{position:absolute;inset:0;pointer-events:none}
+#pins .pin{pointer-events:auto}
 .zoomctl{position:absolute;top:16px;left:16px;z-index:30;display:flex;gap:6px}
 .zoomctl button{border:0;background:var(--white);border-radius:10px;padding:8px 13px;font-weight:800;box-shadow:0 2px 0 var(--gray)}
 .zoomctl button.on{background:var(--yellow)}
-.zoomctl .sep{width:1px;background:rgba(255,255,255,.45);margin:2px 4px}
+/* Only offered once there is something to come back from. */
+.zoomctl{opacity:0;pointer-events:none;transition:opacity .2s}
+#mapwrap.zoomed .zoomctl{opacity:1;pointer-events:auto}
 #mapwrap img.basemap{display:block;width:100%;height:auto}
 .pin{position:absolute;transform:translate(-50%,-100%);border:0;background:none;text-align:center;z-index:3}
 .pin.dim{z-index:1}
@@ -95,6 +102,10 @@ header{display:flex;align-items:center;gap:18px;padding:18px 32px}
  filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
 .pin:hover .hex{transform:scale(1.15)}
 .pin.dim .hex{background:#cfcfc6;color:#8a8a8a}
+/* A group pin is stacked-looking, so "click me to open up" reads before you
+   have read the label. */
+.pin.group .hex{box-shadow:6px -6px 0 -1px rgba(255,255,255,.85),10px -10px 0 -2px rgba(255,255,255,.5)}
+.pin.group .lbl{background:var(--yellow)}
 .pin .lbl{font-weight:800;font-size:13px;background:var(--white);border-radius:999px;padding:2px 10px;box-shadow:0 2px 6px rgba(0,0,0,.35);margin-top:4px;display:inline-block;white-space:nowrap}
 .timeline{display:flex;justify-content:center;gap:8px;padding:22px 32px}
 .timeline button{border:0;background:var(--white);border-radius:12px;padding:10px 16px;font-weight:800;font-size:16px;box-shadow:0 2px 0 var(--gray)}
@@ -104,9 +115,23 @@ header{display:flex;align-items:center;gap:18px;padding:18px 32px}
 .flyout h3{font-family:var(--disp);font-size:22px}
 .flyout .cnt{color:#8a8a8a;font-weight:600;font-size:13px;margin-bottom:10px}
 .flyout h4{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#8a8a8a;margin:12px 0 6px}
-.flyout .cls{display:flex;justify-content:space-between;width:100%;border:0;background:var(--light);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-weight:600;font-size:14px}
-.flyout .cls:hover{background:var(--yellow)}
-.flyout .cls small{color:#8a8a8a;font-weight:700}
+/* [V3-6] Two targets per row: the name opens the class, the school year
+   filters the list to that year. The year is a real button with its own hover
+   state so the split is visible before anyone clicks it. */
+.flyout .cls{display:flex;align-items:stretch;gap:6px;margin-bottom:6px}
+.flyout .clsname{flex:1;text-align:left;border:0;background:var(--light);border-radius:10px;
+ padding:9px 12px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.flyout .clsname:hover{background:var(--yellow)}
+.flyout .yr{border:0;background:#ececec;border-radius:10px;padding:9px 10px;font-family:inherit;
+ font-weight:800;font-size:12.5px;color:#7a7a7a;cursor:pointer;white-space:nowrap}
+.flyout .yr:hover{background:var(--acc-bl);color:#fff}
+.flyout .yearpill{width:100%;border:0;border-radius:10px;padding:9px 12px;margin-bottom:10px;
+ font-family:inherit;font-weight:800;font-size:13px;background:var(--yellow);cursor:pointer;
+ box-shadow:0 2px 0 #c9b100}
+.flyout .hint{font-size:12px;font-weight:600;color:#8a8a8a;background:var(--light);
+ border-radius:8px;padding:7px 10px;margin-bottom:10px;line-height:1.45}
+.flyout .cityhead{color:var(--ink);font-size:14px;letter-spacing:0;text-transform:none;
+ font-family:var(--disp);margin:14px 0 2px}
 
 /* ============ CLASS PAGE ============ */
 .fold{min-height:calc(100vh - 96px);display:flex;flex-direction:column;padding:0 32px 10px}
@@ -177,17 +202,21 @@ header{display:flex;align-items:center;gap:18px;padding:18px 32px}
   <header>
     <div class="title">The Atlas<small>SteamHead Living Lessons · pick a class</small></div>
   </header>
-  <div id="mapwrap"><div class="zoomctl">
-  <button onclick="setZoom(1)" id="z1" class="on">1×</button>
-  <button onclick="setZoom(1.8)" id="z2">2×</button>
-  <button onclick="setZoom(2.8)" id="z3">3×</button>
-  <span class="sep"></span>
-  <button onclick="setVariant('atlantic')" id="v-atlantic" class="on">Atlantic</button>
-  <button onclick="setVariant('pacific')" id="v-pacific">Pacific</button></div>
- <div id="mapview"><div id="mapinner">
-    <img class="basemap" id="basemap" src="../atlas/atlas-map-atlantic.svg"
-         alt="World map. Countries where SteamHead has taught are filled in yellow; pins mark the cities with classes.">
-    <div id="pins"></div></div></div>
+  <div id="mapwrap">
+  <!-- [V3-5] The manual zoom ladder is gone; pins do the zooming. This one
+       control is a way BACK, which a teacher driving from the front of the
+       room needs, and it only appears once the map has moved. -->
+  <div class="zoomctl"><button onclick="resetMap()" id="z-reset">↺ Whole world</button></div>
+ <div id="mapview">
+    <div id="mapinner">
+      <img class="basemap" id="basemap" src="../atlas/atlas-map-pacific.svg"
+           alt="World map. Countries where SteamHead has taught are filled in yellow; pins mark the cities with classes.">
+    </div>
+    <!-- #pins is a SIBLING of #mapinner, never a child: #mapinner carries the
+         zoom transform, and a pin inside it would be scaled 6x along with the
+         coastlines. Pin positions are computed from the view instead. -->
+    <div id="pins"></div>
+  </div>
     <div class="flyout" id="flyout"></div>
   </div>
   <div class="timeline" id="timeline"></div>
@@ -277,48 +306,283 @@ let yearSel="all", currentClass=null, sessions=16, doneCount=3, selSession=null;
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
  document.getElementById(id).classList.add('show');window.scrollTo(0,0);}
 
-/* ---- Atlas ---- */
-/* [V3-2] Equal Earth, from the generated module — never re-derive it here.
-   AtlasMap.project returns viewBox units; scale by the displayed width so pins
-   follow the base map through resizes and through the 1x/2x/3x zoom. */
-let mapVariant='atlantic';
-function proj(lat,lng){
- const w=document.getElementById('mapinner').clientWidth;
- const k=w/AtlasMap.params[mapVariant].viewBox[2];
- const [x,y]=AtlasMap.project(lng,lat,mapVariant);
- return [x*k,y*k];}
-function setVariant(v){mapVariant=v;
- document.getElementById('basemap').src=`../atlas/atlas-map-${v}.svg`;
- ['atlantic','pacific'].forEach(k=>document.getElementById('v-'+k).classList.toggle('on',k===v));
- drawPins();}
-function cities(){const m={};
- CLASSES.forEach(c=>{if(yearSel!=="all"&&c.year!==yearSel)return;
-  (m[c.city]=m[c.city]||{lat:c.lat,lng:c.lng,classes:[]}).classes.push(c);
-  m[c.city].lat=c.lat;m[c.city].lng=c.lng;});
- return m;}
-function drawPins(){const box=document.getElementById('pins');box.innerHTML='';
- const cm=cities();
- // include dim pins for cities inactive this year
- const all={};CLASSES.forEach(c=>{all[c.city]={lat:c.lat,lng:c.lng}});
- Object.entries(all).forEach(([city,pos])=>{
-  const act=cm[city];const [x,y]=proj(pos.lat,pos.lng);
-  const b=document.createElement('button');
-  b.className='pin'+(act?'':' dim');b.style.left=x+'px';b.style.top=y+'px';
-  b.innerHTML=`<div class="hex">${act?act.classes.length:'·'}</div><span class="lbl">${city}</span>`;
-  if(act)b.onclick=()=>openFlyout(city,act.classes);
-  else b.onclick=()=>{document.getElementById('flyout').classList.remove('open')};
-  box.appendChild(b);});}
-function openFlyout(city,list){
- const schools={};list.forEach(c=>(schools[c.school]=schools[c.school]||[]).push(c));
- const f=document.getElementById('flyout');
- f.innerHTML=`<h3>${city}</h3><div class="cnt">${Object.keys(schools).length} school(s) · ${list.length} class(es)${yearSel==="all"?" · all years":" · "+yearSel}</div>`+
-  Object.entries(schools).map(([s,cl])=>`<h4>${s}</h4>`+cl.sort((a,b)=>a.year-b.year||(''+a.grade).localeCompare(''+b.grade))
-   .map(c=>`<button class="cls" onclick='openClass(${JSON.stringify(c)})'><span>${c.name}</span><small>${c.year}-${String(c.year+1).slice(2)}</small></button>`).join('')).join('');
- f.classList.add('open');}
-function drawTimeline(){document.getElementById('timeline').innerHTML=
- [`<button class="${yearSel==='all'?'on':''}" onclick="yearSel='all';refreshAtlas()">All years</button>`,
-  ...YEARS.map(y=>`<button class="${yearSel===y?'on':''}" onclick="yearSel=${y};refreshAtlas()">${y}</button>`)].join('');}
-function refreshAtlas(){drawTimeline();drawPins();document.getElementById('flyout').classList.remove('open');}
+/* ---- Atlas ---------------------------------------------------------------
+   [V3-2] Equal Earth, from the generated module — never re-derive it here.
+   [V3-5] Click-to-zoom replaces the old 1x/2x/3x ladder.
+
+   Two clicks reach a class, always:
+     click 1  a pin that overlaps others  -> zoom to fit that group, so they
+                                             separate into individual pins
+              a pin standing on its own   -> zoom to it
+     click 2  any pin already separated    -> open the class list
+
+   Zoom is CAPPED AT MAX_ZOOM, and that cap is a property of the base map, not
+   a preference. James asked for the lone-pin zoom to frame "a 1 km x 1 km
+   area". A 1 km viewport cannot work here: the base map is Natural Earth 1:50m
+   simplified for projection, so its coastlines are straight lines below about
+   20 km, and its labels and city dots are baked into the SVG and therefore
+   scale with it. Past roughly 6x, "USA" fills the screen and every city dot
+   becomes an orange blob. Rendered at 4x, 8x, 20x and 60x, the map still reads
+   at 4-6x and is a flat field of colour by 20x. So the cap is 6x, which is
+   plenty to separate cities hundreds of kilometres apart (San Francisco and
+   San Marcos land 125 px apart at 5x).
+
+   Cities too close to EVER separate — Kailua-Kona, Holualoa and
+   Honaunau-Napoopoo are within 60 km of each other; Hackney is 8 km from
+   London — cannot be solved by zooming at any sane scale. Those groups zoom as
+   far as the cap allows and then open a combined list, grouped by city. That
+   fallback is why this is a group flyout rather than a city flyout.
+--------------------------------------------------------------------------- */
+const MAP_VARIANT = 'pacific';         /* James's framing choice, 2026-09-02 */
+const VB = AtlasMap.params[MAP_VARIANT].viewBox;
+const MAX_ZOOM = 6;                   /* see the note above — a base-map limit */
+const FOCUS_ZOOM = 4.5;               /* a lone pin: "we are going here" */
+const CLUSTER_PX = 68;                /* the hex is 54px wide; closer than this collides */
+const FIT_PAD = 110;                  /* keeps a fitted group clear of the frame */
+const EASE_MS = 420;
+
+let view = { k: 1, ox: 0, oy: 0 };
+/* Cities whose pin has already been pulled clear of its neighbours by a zoom.
+   Their next click opens the class list rather than zooming again — this is
+   what keeps the interaction at two clicks for grouped and lone pins alike. */
+let separated = new Set();
+let tween = null;
+
+function metrics(){
+  const el = document.getElementById('mapview');
+  return { W: el.clientWidth, H: el.clientHeight, s: el.clientWidth / VB[2] };
+}
+/* viewBox units -> screen px under a given view */
+function toScreen(lat, lng, v){
+  const { s } = metrics();
+  const [x, y] = AtlasMap.project(lng, lat, MAP_VARIANT);
+  return [v.ox + v.k * s * x, v.oy + v.k * s * y];
+}
+/* Never let the map be dragged so far that the world leaves the frame. */
+function clamp(v){
+  const { W, H, s } = metrics();
+  const mw = v.k * s * VB[2], mh = v.k * s * VB[3];
+  v.ox = mw <= W ? (W - mw) / 2 : Math.min(0, Math.max(W - mw, v.ox));
+  v.oy = mh <= H ? (H - mh) / 2 : Math.min(0, Math.max(H - mh, v.oy));
+  return v;
+}
+function viewCentredOn(x, y, k){
+  const { W, H, s } = metrics();
+  return clamp({ k, ox: W / 2 - k * s * x, oy: H / 2 - k * s * y });
+}
+/* The view that opens a group up: zoomed just far enough to pull its pins
+   apart, never so far that a member leaves the frame, never past the cap.
+   Zooming only as far as needed matters — every extra step magnifies the
+   labels and dots baked into the base map, so the restrained zoom is also the
+   legible one. */
+function viewForGroup(points){
+  const { W, H, s } = metrics();
+  const pts = points.map(p => AtlasMap.project(p.lng, p.lat, MAP_VARIANT));
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const spanX = Math.max(...xs) - Math.min(...xs), spanY = Math.max(...ys) - Math.min(...ys);
+
+  /* The largest zoom that still shows every member. */
+  const kFit = Math.min(
+    spanX > 0 ? (W - FIT_PAD * 2) / (s * spanX) : Infinity,
+    spanY > 0 ? (H - FIT_PAD * 2) / (s * spanY) : Infinity
+  );
+  /* The smallest zoom that pulls the closest pair a comfortable gap apart. */
+  let closest = Infinity;
+  for (let i = 0; i < pts.length; i++)
+    for (let j = i + 1; j < pts.length; j++)
+      closest = Math.min(closest, Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]));
+  const kSplit = closest > 0 && closest < Infinity
+    ? (CLUSTER_PX * 1.6) / (s * closest) : 1;
+
+  const k = Math.max(1, Math.min(kSplit, kFit, MAX_ZOOM));
+  const target = viewCentredOn((Math.min(...xs) + Math.max(...xs)) / 2,
+                               (Math.min(...ys) + Math.max(...ys)) / 2, k);
+  /* Ask the real question — will they actually be apart once we get there? —
+     rather than inferring it from whether the cap was hit. Kailua-Kona and
+     Holualoa stay on top of each other at any zoom this base map supports, and
+     those are the groups that need a list instead. */
+  const stillTogether = closest * s * k < CLUSTER_PX;
+  return { view: target, stillTogether };
+}
+function render(){
+  const inner = document.getElementById('mapinner');
+  inner.style.transform = `translate(${view.ox}px,${view.oy}px) scale(${view.k})`;
+  document.getElementById('mapwrap').classList.toggle('zoomed', view.k > 1.01);
+  drawPins();
+}
+/* Tweened by hand rather than by a CSS transition: the pins live outside the
+   transformed layer so they stay crisp and a constant size, which means their
+   positions have to be recomputed on every frame of the movement. */
+function glideTo(target, then){
+  if (tween) cancelAnimationFrame(tween);
+  const from = { ...view }, t0 = performance.now();
+  (function step(now){
+    const p = Math.min(1, (now - t0) / EASE_MS);
+    const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;  /* ease-in-out cubic */
+    view = { k: from.k + (target.k - from.k) * e,
+             ox: from.ox + (target.ox - from.ox) * e,
+             oy: from.oy + (target.oy - from.oy) * e };
+    render();
+    if (p < 1) tween = requestAnimationFrame(step);
+    else { tween = null; if (then) then(); }
+  })(t0);
+}
+function resetMap(){
+  separated = new Set();
+  closeFlyout();
+  glideTo(clamp({ k: 1, ox: 0, oy: 0 }));
+}
+
+/* ---- pins ---- */
+function cities(){
+  const m = {};
+  CLASSES.forEach(c => {
+    const e = m[c.city] = m[c.city] || { city: c.city, lat: c.lat, lng: c.lng, classes: [] };
+    e.lat = c.lat; e.lng = c.lng;
+    if (yearSel === "all" || c.year === yearSel) e.classes.push(c);
+  });
+  return Object.values(m);
+}
+/* Single-linkage grouping on SCREEN distance, so groups dissolve as you zoom
+   in — which is the whole point: the same click that zooms also splits the
+   group it was pointing at. */
+function groupPins(){
+  const list = cities().map(c => ({ ...c, xy: toScreen(c.lat, c.lng, view) }));
+  const groups = [];
+  for (const c of list){
+    const hit = groups.find(g => g.members.some(m =>
+      Math.hypot(m.xy[0] - c.xy[0], m.xy[1] - c.xy[1]) < CLUSTER_PX));
+    if (hit) hit.members.push(c); else groups.push({ members: [c] });
+  }
+  for (const g of groups){
+    g.xy = [ g.members.reduce((n, m) => n + m.xy[0], 0) / g.members.length,
+             g.members.reduce((n, m) => n + m.xy[1], 0) / g.members.length ];
+    g.classes = g.members.flatMap(m => m.classes);
+    g.active = g.classes.length > 0;
+    g.key = g.members.map(m => m.city).sort().join('|');
+  }
+  return groups;
+}
+function drawPins(){
+  const box = document.getElementById('pins');
+  const { W, H } = metrics();
+  box.innerHTML = '';
+  for (const g of groupPins()){
+    const [x, y] = g.xy;
+    if (x < -80 || x > W + 80 || y < -60 || y > H + 90) continue;   /* off-frame */
+    const many = g.members.length > 1;
+    const b = document.createElement('button');
+    b.className = 'pin' + (g.active ? '' : ' dim') + (many ? ' group' : '');
+    b.style.left = x + 'px';
+    b.style.top = y + 'px';
+    const label = many ? `${g.members.length} places` : g.members[0].city;
+    b.innerHTML = `<div class="hex">${g.active ? g.classes.length : '·'}</div>` +
+                  `<span class="lbl">${label}</span>`;
+    b.setAttribute('aria-label', g.active
+      ? `${label}, ${g.classes.length} classes` + (many ? ' — zoom in' : '')
+      : `${label}, no classes in this year`);
+    b.onclick = () => pinClicked(g);
+    box.appendChild(b);
+  }
+}
+/* The two-click rule lives here and nowhere else. */
+function pinClicked(g){
+  if (!g.active){ closeFlyout(); return; }
+
+  if (g.members.length > 1){
+    const { view: target, stillTogether } = viewForGroup(g.members);
+    const wanted = new Set(g.members.map(m => m.city));
+    g.members.forEach(m => separated.add(m.city));
+    /* Only a group that will STILL be overlapping when we arrive gets the list
+       — see the Kona / Hackney note at the top of this block. And the list is
+       rebuilt from the groups as they stand AFTER the move, so it covers just
+       the cities that are genuinely still stacked: clicking a group of four
+       where three stay stacked lists those three, not the one that came free
+       and is now sitting there as its own pin. */
+    glideTo(target, stillTogether ? () => {
+      const remaining = groupPins().find(x => x.members.length > 1 && x.members.some(m => wanted.has(m.city)));
+      if (remaining) openFlyout(remaining);
+    } : null);
+    return;
+  }
+
+  const city = g.members[0].city;
+  if (separated.has(city)){ openFlyout(g); return; }
+  separated.add(city);
+  const [vx, vy] = AtlasMap.project(g.members[0].lng, g.members[0].lat, MAP_VARIANT);
+  glideTo(viewCentredOn(vx, vy, FOCUS_ZOOM));
+}
+
+/* ---- class selection ---- */
+/* [V3-6] School-year filtering with no filter menu. Every class row already
+   carries its school year, so the year itself IS the control: click "2018-19"
+   on any row and the list narrows to that year. Nothing new appears on screen
+   until you use it, which is what James asked for — Shenzhen and San
+   Francisco carry 30+ classes each and the rest carry two or three, so a
+   permanent filter bar would be clutter almost everywhere it appeared. */
+const LONG_LIST = 12;                  /* past this, offer the hint */
+let flyoutGroup = null, yearFilter = null;
+
+const schoolYear = c => `${c.year}-${String(c.year + 1).slice(2)}`;
+const closeFlyout = () => {
+  flyoutGroup = null; yearFilter = null;
+  document.getElementById('flyout').classList.remove('open');
+};
+function filterYear(y){ yearFilter = y; renderFlyout(); }
+function clearYearFilter(){ yearFilter = null; renderFlyout(); }
+
+function openFlyout(g){ flyoutGroup = g; yearFilter = null; renderFlyout(); }
+
+function renderFlyout(){
+  const g = flyoutGroup;
+  if (!g) return;
+  const f = document.getElementById('flyout');
+  const all = g.classes;
+  const shown = yearFilter ? all.filter(c => schoolYear(c) === yearFilter) : all;
+  const years = [...new Set(all.map(schoolYear))].sort();
+  const title = g.members.length > 1 ? `${g.members.length} places` : g.members[0].city;
+
+  /* Grouped by city first when the flyout covers a whole cluster, then by
+     school — otherwise two Prague schools would read as one list. */
+  const byCity = {};
+  shown.forEach(c => (byCity[c.city] = byCity[c.city] || []).push(c));
+
+  let html = `<h3>${title}</h3><div class="cnt">${shown.length} of ${all.length} class(es)` +
+             `${years.length > 1 ? ` · ${years.length} school years` : ''}</div>`;
+  if (yearFilter){
+    html += `<button class="yearpill on" onclick="clearYearFilter()">${yearFilter} ✕ show all years</button>`;
+  } else if (all.length > LONG_LIST){
+    html += `<div class="hint">Long list — click any year to show only that year.</div>`;
+  }
+
+  for (const [city, list] of Object.entries(byCity)){
+    if (g.members.length > 1) html += `<h4 class="cityhead">${city}</h4>`;
+    const schools = {};
+    list.forEach(c => (schools[c.school] = schools[c.school] || []).push(c));
+    for (const [school, cl] of Object.entries(schools)){
+      html += `<h4>${school}</h4>`;
+      html += cl.sort((a, b) => a.year - b.year || ('' + a.grade).localeCompare('' + b.grade))
+        /* While a year filter is on, every row would repeat the same year and
+           the pill above already says which — so the badge steps aside and the
+           name gets the full width. */
+        .map(c => `<div class="cls"><button class="clsname" onclick='openClass(${JSON.stringify(c)})'>${c.name}</button>` +
+                  (yearFilter ? '' :
+                   `<button class="yr" onclick="filterYear('${schoolYear(c)}')" ` +
+                   `title="Show only ${schoolYear(c)}" aria-label="Show only ${schoolYear(c)}">${schoolYear(c)}</button>`) +
+                  `</div>`)
+        .join('');
+    }
+  }
+  f.innerHTML = html;
+  f.classList.add('open');
+}
+
+function drawTimeline(){
+  document.getElementById('timeline').innerHTML =
+    [`<button class="${yearSel === 'all' ? 'on' : ''}" onclick="yearSel='all';refreshAtlas()">All years</button>`,
+     ...YEARS.map(y => `<button class="${yearSel === y ? 'on' : ''}" onclick="yearSel=${y};refreshAtlas()">${y}</button>`)].join('');
+}
+function refreshAtlas(){ drawTimeline(); closeFlyout(); render(); }
 
 /* ---- Class Page ---- */
 function openClass(c){currentClass=c;sessions=16;
@@ -394,23 +658,35 @@ function drawHexList(){const n=selSession;
 document.getElementById('ovl').onclick=e=>{if(e.target.id==='ovl')document.getElementById('ovl').classList.remove('open')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('ovl').classList.remove('open')});
 
-let zoom=1;
-function setZoom(z){zoom=z;const inner=document.getElementById('mapinner');
- const view=document.getElementById('mapview');
- const cx=(view.scrollLeft+view.clientWidth/2)/inner.clientWidth;
- const cy=(view.scrollTop+view.clientHeight/2)/inner.clientHeight;
- inner.style.width=(z*100)+'%';
- [['z1',1],['z2',1.8],['z3',2.8]].forEach(([id,v])=>document.getElementById(id).classList.toggle('on',v===z));
- drawPins();
- view.scrollLeft=cx*inner.clientWidth-view.clientWidth/2;
- view.scrollTop=cy*inner.clientHeight-view.clientHeight/2;}
-(function(){const v=document.getElementById('mapview');let drag=null;
- v.addEventListener('pointerdown',e=>{if(e.target.closest('.pin'))return;drag={x:e.clientX,y:e.clientY,l:v.scrollLeft,t:v.scrollTop};v.classList.add('grabbing')});
- window.addEventListener('pointermove',e=>{if(!drag)return;v.scrollLeft=drag.l-(e.clientX-drag.x);v.scrollTop=drag.t-(e.clientY-drag.y)});
- window.addEventListener('pointerup',()=>{drag=null;v.classList.remove('grabbing')});})();
-window.addEventListener('resize',drawPins);
+/* [V3-5] Drag to pan by moving the view, not the scrollbars. Pointer capture
+   means a drag that leaves the map still ends cleanly, and the 4px threshold
+   keeps a slightly shaky click on a pin from being swallowed as a pan. */
+(function(){
+  const v = document.getElementById('mapview');
+  let drag = null;
+  v.addEventListener('pointerdown', e => {
+    if (e.target.closest('.pin')) return;
+    drag = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy, moved: false };
+    v.setPointerCapture(e.pointerId);
+  });
+  v.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+    drag.moved = true; v.classList.add('grabbing');
+    view = clamp({ k: view.k, ox: drag.ox + dx, oy: drag.oy + dy });
+    render();
+  });
+  const stop = () => { drag = null; v.classList.remove('grabbing'); };
+  v.addEventListener('pointerup', stop);
+  v.addEventListener('pointercancel', stop);
+})();
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('scr-atlas').classList.contains('show')) resetMap();
+});
+window.addEventListener('resize',()=>{view=clamp(view);render();});
 /* The base map is ~380 KB; until it has laid out, #mapinner has no height and
    the pins would all pile up at the top-left. Redraw on load. */
-document.getElementById('basemap').addEventListener('load',drawPins);
+document.getElementById('basemap').addEventListener('load',()=>{view=clamp(view);render();});
 refreshAtlas();
 </script></body></html>
