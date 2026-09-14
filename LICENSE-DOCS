@@ -1,0 +1,25 @@
+Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+
+Copyright (c) 2026 SteamHead
+
+This license covers the curriculum and documentation in this repository:
+skills/, hexagons/, protocols/, materials/, classes/, guides/, docs/, and
+design/design-brief.md. Code, scripts and configuration are covered by the
+MIT license in LICENSE. Where a file could plausibly fall under either — the
+zod schemas describing content shapes, for instance — the README states which
+applies.
+
+You are free to share and adapt this material for any purpose, including
+commercially, provided you give appropriate credit and distribute your
+contributions under this same license.
+
+The full legal code is at:
+
+    https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+A plain-language summary is at:
+
+    https://creativecommons.org/licenses/by-sa/4.0/
+
+Why share-alike rather than plain attribution, and what it costs:
+see SteamHead/steamhead-standards -> licensing.md.
