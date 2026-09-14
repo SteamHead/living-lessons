@@ -8,6 +8,7 @@ to *do* something.
 |---|---|
 | [writing-a-new-hexagon.md](writing-a-new-hexagon.md) | Authoring a new activity file |
 | [git-workflow.md](git-workflow.md) | The daily save-review-push loop, and fixing common mishaps |
+| [claude-code-setup.md](claude-code-setup.md) | Getting a Claude Code session working against this repo |
 | [reviewing-ai-drafts.md](reviewing-ai-drafts.md) | Clearing the AI-draft markers from rubrics and hexagons |
 | [glossary.md](glossary.md) | What every project term means, in one page |
 
