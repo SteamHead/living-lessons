@@ -27,6 +27,7 @@ any visible UI. See [CLAUDE-CODE-HANDOFF.md](CLAUDE-CODE-HANDOFF.md).
 | `design/atlas/` | The generated world base map for the Atlas: build script, inputs, outputs. [Rationale](design/atlas/_README.md). |
 | `docs/decisions.md` | Running architecture & taxonomy decision log |
 | `docs/project-instructions.md` | Instructions for the Claude planning project |
+| `docs/legacy/` | Scans of the printed curriculum that predates this system. Not canonical — historical source only. [What's in it](docs/legacy/_README.md). |
 | `CLAUDE-CODE-HANDOFF.md` | The implementation brief handed to Claude Code |
 | `CLAUDE.md` | Standing instructions for Claude Code sessions in this repo |
 
