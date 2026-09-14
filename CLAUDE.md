@@ -1,7 +1,11 @@
 # CLAUDE.md — Living Lessons (draft)
 
 Living Lessons is an interactive teaching, documentation, and reflection system
-for SteamHead makerspace classes. **Current phase: IMPLEMENTATION.** Planning is complete (D1-D25). App code is built in its own top-level folder; content libraries stay clean and forkable. New contributors read CLAUDE-CODE-HANDOFF.md first. Planning is complete (D1-D25). App code is now being built in `app/` (or `src/`). See CLAUDE-CODE-HANDOFF.md for the first-session brief.
+for SteamHead makerspace classes. **Current phase: IMPLEMENTATION.** Planning is
+complete (D1–D25; later D-numbers are decisions taken during implementation).
+App code is now being built in its own top-level folder (`app/` or `src/`) so the
+content libraries stay clean and independently forkable. New contributors read
+`CLAUDE-CODE-HANDOFF.md` first — it is the first-session brief.
 
 ## What lives here (public repo)
 
@@ -35,6 +39,22 @@ alongside this one). App code lives in its own top-level folder (`app/` or
 `materials/`) are the source of truth, their shapes fixed by each folder's
 `_README.md`. Private/runtime data (badge grants, posts, media) will live in
 Cloudflare D1/R2, never in git (D3) — and is deferred past the first milestones.
+
+**Inherited from the template** — mirror these rather than rediscovering them:
+
+- **Astro 6** with the **`@astrojs/cloudflare`** adapter, deployed as a
+  **Cloudflare Worker, NOT Cloudflare Pages** — ignore any doc that says Pages.
+- **Node >=22.12 is required** (Astro 6 refuses to build on anything older).
+  Pin it with a `.nvmrc` containing `22`: Cloudflare Workers Builds does not
+  read the `engines` field in `package.json`, so without `.nvmrc` a build can
+  fail on whatever Node version Cloudflare happens to default to.
+- **Zod schemas are strict** — a malformed or unknown field fails the build
+  instead of publishing broken. The template's `src/content.config.ts` is the
+  pattern to copy.
+- **Cloudflare account ID `068bd0bae77f7c068677cd14996466fe`.** `wrangler login`
+  can see two accounts — confirm the target account before any deploy.
+- Design tokens for this repo come from **`design/tokens.css`**. (The template
+  uses `src/styles/global.css`; that path does not apply here.)
 
 ## Working rules for AI assistants
 
